@@ -3,6 +3,7 @@
     
     "actors":    {
         "Worker": {
+            "image":            "red_cruiser",
             "type":             "wheeled",
             "max_hp":           10,
             "max_shields":      0,

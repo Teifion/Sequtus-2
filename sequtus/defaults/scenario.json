@@ -5,7 +5,7 @@
     
     "actors":   [     
         {
-            "type": "Red worker",
+            "type": "Worker",
             "pos":  [100, 100, 0],
             "team": 1
         }

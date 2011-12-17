@@ -176,5 +176,4 @@ def make_ai(class_name):
     
     return ai_in_queue, ai_out_queue
 
-
 register_ai("basic", AICore)

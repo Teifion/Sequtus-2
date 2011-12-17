@@ -77,11 +77,16 @@ class BattleScreen (screen.Screen):
         # that we may alter the selection several times in a row and it would
         # be a waste to rebuild menus several times
         self._selection_has_changed = False
+        self.selected_actors = []
     
     def activate(self):
         super(BattleScreen, self).activate()
         self.draw_area[2] = self.size[0] - self.draw_area[0]
         self.draw_area[3] = self.size[1] - self.draw_area[1]
+    
+    def quit(self):
+        self.sim.quit()
+        super(BattleScreen, self).quit()
     
     def _update(self):
         self.sim._update()
@@ -109,34 +114,27 @@ class BattleScreen (screen.Screen):
                     self.draw_area[3]),
             )
         else:
-            surf.fill(self.background_colour)
+            surface.fill(self.background_colour)
         
         # Actors
         for aid, a in self.sim.actors.items():
             a.frame += 1
             
-            img_name = self.engine.get_frame_name(
-                image_name = a.image,
-                frame = a.frame,
-                facing = a.facing[0],
+            actor_img = screen_lib.make_rotated_image(
+                image = self.engine.get_image(a.image, a.frame),
+                angle = a.facing[0]
             )
             
-            if img_name not in self.image_cache:
-                self.image_cache[img_name] = screen_lib.make_rotated_image(
-                    image = self.engine.get_image(a.image, a.frame),
-                    angle = self.engine.round_angle(a.facing[0])
-                )
-            
             # Get the actor's image and rectangle
-            actor_img = self.image_cache[img_name]
+            # actor_img = self.image_cache[img_name]
             r = pygame.Rect(actor_img.get_rect())
-            r.left = a.pos[0] + self.draw_margin[0] - r.width/2
-            r.top = a.pos[1] + self.draw_margin[1] - r.height/2
+            r.left = a.pos[0] + self.draw_offset[0] - r.width/2
+            r.top = a.pos[1] + self.draw_offset[1] - r.height/2
             
             # Only draw actors within the screen
             if r.right > self.draw_area[0] and r.left < self.draw_area[2]:
                 if r.bottom > self.draw_area[1] and r.top < self.draw_area[3]:
-                    surf.blit(actor_img, r)
+                    surface.blit(actor_img, r)
                     
                     # Abilities
                     for ab in a.abilities:
@@ -162,9 +160,9 @@ class BattleScreen (screen.Screen):
                             centre_offset = self.engine.images[ab.image].get_rotated_offset(ab_rounded_facing)
                             ability_img = self.image_cache[ab_img_name]
                             r = pygame.Rect(ability_img.get_rect())
-                            r.left = a.pos[0] + self.draw_margin[0] - r.width/2 + centre_offset[0] + rel_pos[0]
-                            r.top = a.pos[1] + self.draw_margin[1] - r.height/2 + centre_offset[1] + rel_pos[1]
-                            surf.blit(ability_img, r)
+                            r.left = a.pos[0] + self.draw_offset[0] - r.width/2 + centre_offset[0] + rel_pos[0]
+                            r.top = a.pos[1] + self.draw_offset[1] - r.height/2 + centre_offset[1] + rel_pos[1]
+                            surface.blit(ability_img, r)
                     
                     # Selection box?
                     if a.selected:
@@ -173,11 +171,11 @@ class BattleScreen (screen.Screen):
                         # selection_r = pygame.transform.rotate(a.selection_rect(), -rounded_facing)
                         # pygame.draw.rect(surf, (255, 255, 255), selection_r, 1)
                         
-                        surf.blit(*a.health_bar(self.draw_margin[0], self.draw_margin[1]))
+                        surface.blit(*a.health_bar(self.draw_offset[0], self.draw_offset[1]))
                         
                     # Draw completion box anyway
                     if a.completion < 100:
-                        surf.blit(*a.completion_bar(self.draw_margin[0], self.draw_margin[1]))
+                        surface.blit(*a.completion_bar(self.draw_offset[0], self.draw_offset[1]))
             
             # Pass effects from the actor to the battle screen
             # this means that if the actor dies the effect still lives on
@@ -194,35 +192,35 @@ class BattleScreen (screen.Screen):
             
             bullet_img = self.engine.images[b.image].get()
             r = pygame.Rect(bullet_img.get_rect())
-            r.left = b.pos[0] + self.draw_margin[0] - b.width/2
-            r.top = b.pos[1] + self.draw_margin[1] - b.height/2
+            r.left = b.pos[0] + self.draw_offset[0] - b.width/2
+            r.top = b.pos[1] + self.draw_offset[1] - b.height/2
             
             # Only draw bullets within the screen
             if r.right > self.draw_area[0] and r.left < self.draw_area[2]:
                 if r.bottom > self.draw_area[1] and r.top < self.draw_area[3]:
                     if b.image == "":
                         # Bullet is dynamically drawn
-                        b.draw(surf, self.draw_margin)
+                        b.draw(surf, self.draw_offset)
                     else:
                         # Bullet has an image
-                        surf.blit(bullet_img, r)
+                        surface.blit(bullet_img, r)
                 
         # Draw effects last
         for i, e in enumerate(self.sim.effects):
             r = pygame.Rect(e.rect)
-            r.left = e.rect.left + self.draw_margin[0]
-            r.top = e.rect.top + self.draw_margin[1]
+            r.left = e.rect.left + self.draw_offset[0]
+            r.top = e.rect.top + self.draw_offset[1]
             
             # Only draw effects within the screen
             if r.right > self.draw_area[0] and r.left < self.draw_area[2]:
                 if r.bottom > self.draw_area[1] and r.top < self.draw_area[3]:
-                    e.draw(surf, self.draw_margin)
+                    e.draw(surf, self.draw_offset)
         
         # Placement (such as placing a building)
         if self.place_image:
             img = self.engine.images[self.place_image]
             r = img.get_rect()
-            surf.blit(img.get(), pygame.Rect(
+            surface.blit(img.get(), pygame.Rect(
                 self.mouse[0] - r.width/2, self.mouse[1] - r.height/2,
                 r.width, r.height,
             ))
@@ -236,7 +234,7 @@ class BattleScreen (screen.Screen):
                 else:
                     c.draw(surface)
             
-            # surf.blit(*p.image())
+            # surface.blit(*p.image())
         
         # Dragrect
         if self.mouse_is_down and self.scrolled_mousedrag_at != None:
@@ -406,10 +404,10 @@ class BattleScreen (screen.Screen):
         # No mouse order, we're just looking to select an actor
         else:
             if not KMOD_SHIFT & mods:
-                self.sim.unselect_all_actors()
+                self.unselect_all_actors()
             
             for aid, a in self.sim.actors.items():
-                if actor_lib.contains_point(a, real_mouse_pos):
+                if actor_lib.contains_point(a, scrolled_mouse_pos):
                     self.left_click_actor(a)
                     break
         
@@ -509,7 +507,7 @@ class BattleScreen (screen.Screen):
         short_list = []
         if event.button == 1:
             if not KMOD_SHIFT & mods:
-                self.sim.unselect_all_actors()
+                self.unselect_all_actors()
             
             # First see if there are friendlies there
             # if the selection contains friendlies then we
@@ -565,8 +563,37 @@ class BattleScreen (screen.Screen):
         self.scroll_y = min(self.scroll_boundaries[3], max(self.scroll_boundaries[1], self.scroll_y))
         
         # Alter draw margin
-        self.draw_margin[0] = self.scroll_x + self.draw_area[0]
-        self.draw_margin[1] = self.scroll_y + self.draw_area[1]
+        self.draw_offset[0] = self.scroll_x + self.draw_area[0]
+        self.draw_offset[1] = self.scroll_y + self.draw_area[1]
+    
+    def left_click_actor(self, act):
+        """Invert selection on actor"""
+        if act.selected:
+            self.unselect_actor(act)
+        else:
+            self.select_actor(act)
+    
+    def unselect_all_actors(self):
+        for a in self.selected_actors[:]:
+            del(self.selected_actors[self.selected_actors.index(a)])
+            a.selected = False
+            self._selection_has_changed = True
+    
+    def unselect_actor(self, a):
+        try:
+            a.selected = False
+            del(self.selected_actors[self.selected_actors.index(a)])
+        except Exception as e:
+            print("""! battle_screen.unselect_actor had an exception trying
+to delete an actor from the list of selected actors.""")
+        
+        a.selected = False
+        self._selection_has_changed = True
+    
+    def select_actor(self, a):
+        self.selected_actors.append(a)
+        a.selected = True
+        self._selection_has_changed = True
     
     # def place_actor_mode(self, actor_type):
     #     """Used to enter placement mode where an icon hovers beneath the
@@ -576,10 +603,5 @@ class BattleScreen (screen.Screen):
     #     
     #     self.mouseup_callback = self.place_actor_from_click
     #     self.mouseup_callback_args = [{"type":actor_type}]
-    
-    # def add_actor(self, a):
-    #     a.rect = self.engine.images[a.image].get_rect()
-    #     a.oid = self._current_actor_id
-    #     self._current_actor_id += 1
-    #     self.sim.actors[a.oid] = a
+
     

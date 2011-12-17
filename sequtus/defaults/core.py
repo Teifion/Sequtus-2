@@ -8,14 +8,28 @@ def temp_engine():
     return e
 
 class DefaultCore (application_core.EngineV4):
-    def __init__(self):
+    def __init__(self, test_sim=True):
         super(DefaultCore, self).__init__()
         
         self.load_static_images(
-            ["background", "sequtus/defaults/background.png"]
+            ["background", "sequtus/defaults/background.png"],
+            ["red_cruiser", "sequtus/defaults/red_cruiser.png"],
+            ["red_factory", "sequtus/defaults/red_factory.png"],
         )
         
         self.screens['main menu'] = menus.DefaultMenu(self, [640, 480])
-        self.screens['battle'] = battle.DefaultBattle(self, [640, 480], sim=sim.DefaultSim(
-            engine = self, scenario = "sequtus/defaults/scenario.json",
-            game_data = "sequtus/defaults/game_data.json"))
+        
+        if test_sim:
+            s = sim.TestSim(
+                engine = self,
+                scenario = "sequtus/defaults/scenario.json",
+                game_data = "sequtus/defaults/game_data.json",
+            )
+        else:
+            s = sim.DefaultSim(
+                engine = self,
+                scenario = "sequtus/defaults/scenario.json",
+                game_data = "sequtus/defaults/game_data.json",
+            )
+        
+        self.screens['battle'] = battle.DefaultBattle(self, [640, 480], sim=s)

@@ -83,6 +83,7 @@ class BattleSim (object):
         # Vars
         self.running = True
         self.loaded = False
+        self._current_actor_id = 0
         
         # Reference info
         self.actor_types = {}
@@ -111,8 +112,24 @@ class BattleSim (object):
         
         self.ai_prefs = {}
         
-        # Now load it all up
-        self.load_all(scenario, game_data, config)
+        # Now load it all up, if we error here we want to kill our threads
+        try:
+            self.load_all(scenario, game_data, config)
+        except Exception as e:
+            self.quit()
+            raise
+    
+    def add_order(self, the_actor, command, pos=None, target=None):
+        """Sets the order for a given actor"""
+        if type(the_actor) == int:
+            the_actor = self.actors[the_actor]
+        self.orders[self.tick + self.tick_jump].append((the_actor, command, pos, target))
+    
+    def queue_order(self, the_actor, command, pos=None, target=None):
+        """Adds an order to the queue for a given actor"""
+        if type(the_actor) == int:
+            the_actor = self.actors[the_actor]
+        self.q_orders[self.tick + self.tick_jump].append((the_actor, command, pos, target))
     
     def quit(self, event=None):
         for k, q in self.out_queues.items():
@@ -227,6 +244,7 @@ class BattleSim (object):
         
         self.orders[self.tick + self.tick_jump] = []
         self.q_orders[self.tick + self.tick_jump] = []
+        
         self.issue_orders()
         
         # Update the AIs
@@ -356,6 +374,7 @@ class BattleSim (object):
     def place_actor(self, actor_data, builders=[]):
         """Called when there's a click while in placement mode.
         Returns a weakref to the actor just created"""
+        
         class_type = self.actor_types[actor_data['type']]['type']
         aclass = actor_subtypes.types[class_type]
         
@@ -388,12 +407,14 @@ class BattleSim (object):
         self.add_actor(a)
         self.actor_lookup[a.oid] = weakref.ref(a)()
         
-        mods = pygame.key.get_mods()
+        # mods = pygame.key.get_mods()
         for b in builders:
-            if KMOD_SHIFT & mods:
-                self.queue_order(b, "aid", target=self.actor_lookup[a.oid])
-            else:
-                self.add_order(b, "aid", target=self.actor_lookup[a.oid])
+            self.queue_order(b, "aid", target=self.actor_lookup[a.oid])
+            
+            # if KMOD_SHIFT & mods:
+            #     self.queue_order(b, "aid", target=self.actor_lookup[a.oid])
+            # else:
+            #     self.add_order(b, "aid", target=self.actor_lookup[a.oid])
         
         return self.actor_lookup[a.oid]
     
@@ -554,7 +575,9 @@ class BattleSim (object):
         
         self.loaded = True
     
-    def unselect_all_actors(self):
-        pass
-        # raise Exception("Not implemented")
-
+    def add_actor(self, a):
+        a.rect = self.engine.images[a.image].get_rect()
+        a.oid = self._current_actor_id
+        self._current_actor_id += 1
+        self.actors[a.oid] = a
+    

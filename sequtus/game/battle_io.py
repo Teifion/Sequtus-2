@@ -17,25 +17,6 @@ class BattleIO (screen.Screen):
     def __init__(self, engine):
         super(BattleIO, self).__init__(engine, engine.screen_size)
     
-    def add_order(self, the_actor, command, pos=None, target=None):
-        """Sets the order for a given actor"""
-        if type(the_actor) == int:
-            the_actor = self.actors[the_actor]
-        self.orders[self.tick + self.tick_jump].append((the_actor, command, pos, target))
-    
-    def queue_order(self, the_actor, command, pos=None, target=None):
-        """Adds an order to the queue for a given actor"""
-        if type(the_actor) == int:
-            the_actor = self.actors[the_actor]
-        self.q_orders[self.tick + self.tick_jump].append((the_actor, command, pos, target))
-    
-    def left_click_actor(self, act):
-        """Invert selection on actor"""
-        if act.selected:
-            self.unselect_actor(act)
-        else:
-            self.select_actor(act)
-    
     def double_left_click_actor(self, act):
         mods = pygame.key.get_mods()
         actors_to_select = []
@@ -64,30 +45,7 @@ class BattleIO (screen.Screen):
                 self.select_actor(a)
         
         self._selection_has_changed = True
-    
 
-    
-    def unselect_all_actors(self):
-        for a in self.selected_actors[:]:
-            del(self.selected_actors[self.selected_actors.index(a)])
-            a.selected = False
-            self._selection_has_changed = True
-    
-    def unselect_actor(self, a):
-        try:
-            a.selected = False
-            del(self.selected_actors[self.selected_actors.index(a)])
-        except Exception as e:
-            print("""! battle_screen.unselect_actor had an exception trying
-to delete an actor from the list of selected actors.""")
-        
-        a.selected = False
-        self._selection_has_changed = True
-    
-    def select_actor(self, a):
-        self.selected_actors.append(a)
-        a.selected = True
-        self._selection_has_changed = True
     
     def update(self):
         # It might be that the mouse is scrolling

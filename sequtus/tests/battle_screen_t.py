@@ -23,13 +23,11 @@ class BattleScreenTests(unittest.TestCase):
         s = BS(engine=core.temp_engine(), dimensions=[800, 600], fullscreen=False)
         event = pygame.event.Event(KEYDOWN, key=113)
         s._handle_keydown(event)
-        pass
     
     def test_handle_keyhold(self):
         s = BS(engine=core.temp_engine(), dimensions=[800, 600], fullscreen=False)
         event = None
         s._handle_keyhold()
-        pass
     
     def test_handle_keyup(self):
         s = BS(engine=core.temp_engine(), dimensions=[800, 600], fullscreen=False)
@@ -40,13 +38,11 @@ class BattleScreenTests(unittest.TestCase):
         s = BS(engine=core.temp_engine(), dimensions=[800, 600], fullscreen=False)
         event = None
         s._handle_mousemotion(event)
-        pass
 
     def test_handle_mousedown(self):
         s = BS(engine=core.temp_engine(), dimensions=[800, 600], fullscreen=False)
         event = pygame.event.Event(MOUSEBUTTONDOWN, button=1, pos=(100,100))
         s._handle_mousedown(event)
-        pass
     
     def test_handle_mouseup(self):
         s = BS(engine=core.temp_engine(), dimensions=[800, 600], fullscreen=False)
@@ -69,7 +65,6 @@ class BattleScreenTests(unittest.TestCase):
         s = BS(engine=core.temp_engine(), dimensions=[800, 600], fullscreen=False)
         event = pygame.event.Event(MOUSEMOTION, pos=(100,100))
         s._handle_mousedrag(event)
-        pass
     
     def test_handle_mousedragup(self):
         s = BS(engine=core.temp_engine(), dimensions=[800, 600], fullscreen=False)
