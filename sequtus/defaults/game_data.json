@@ -1,0 +1,34 @@
+{
+    "abilities": {},
+    
+    "actors":    {
+        "Worker": {
+            "type":             "wheeled",
+            "max_hp":           10,
+            "max_shields":      0,
+            
+            "acceleration":     1.5,
+            "deceleration":     1.5,
+            "turn_speed":       90,
+            "drifts":           false,
+            "max_velocity":     5,
+            
+            "max_armour":           0,
+            "max_shield_armour":    0,
+            
+            "abilities":  [],
+            "flags":    [],
+            
+            "required_techs":   []
+        }
+    },
+    
+    "build_lists": {},
+    
+    "tech_trees": {},
+    
+    "resources": [
+        {"name":"Metal"},
+        {"name":"Energy"}
+    ]
+}

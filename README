@@ -1,0 +1,9 @@
+Sequtus 2 is a rewrite of the first Sequtus project. There are a lot of things
+I could have done better in the first Sequtus and I want to fix them here. I
+then intend to go further and add networking support. From there I'm not sure
+where I will go.
+
+In an effort to avoid having to make lots of terrain graphics I'm setting this
+one in space.
+
+I'm also back-porting several things from Downstream too.

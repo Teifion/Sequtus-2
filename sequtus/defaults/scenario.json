@@ -1,0 +1,47 @@
+{
+    "battlefield": {
+        "size":     [2000, 2000]
+    },
+    
+    "actors":   [     
+        {
+            "type": "Red worker",
+            "pos":  [100, 100, 0],
+            "team": 1
+        }
+    ],
+    
+    "ais": {
+        "2": {
+            "type": "basic",
+            "bases":    {
+                "core": {
+                    "actors":       ["Blu factory", "Blu adv factory", "5* Blu turret", "2* Blu adv turret", "Blu worker", "Blu adv worker"],
+                    "attacks":      [
+                        ["3* Blu tank"]
+                    ],
+                    "location":     [1500, 1500],
+                    "size":         [400, 400]
+                }
+            }
+        }
+    },
+    
+    "teams": {
+        "1": {
+            "colour": [255, 0, 0],
+            "resources": {
+                "Metal":    500,
+                "Energy":   500
+            }
+        },
+        
+        "2": {
+            "colour": [0, 0, 255],
+            "resources": {
+                "Metal":    500,
+                "Energy":   500
+            }
+        }
+    }
+}
