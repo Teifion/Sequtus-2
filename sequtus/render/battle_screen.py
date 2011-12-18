@@ -160,8 +160,8 @@ class BattleScreen (screen.Screen):
                             centre_offset = self.engine.images[ab.image].get_rotated_offset(ab_rounded_facing)
                             ability_img = self.image_cache[ab_img_name]
                             r = pygame.Rect(ability_img.get_rect())
-                            r.left = a.pos[0] + self.draw_offset[0] - r.width/2 + centre_offset[0] + rel_pos[0]
-                            r.top = a.pos[1] + self.draw_offset[1] - r.height/2 + centre_offset[1] + rel_pos[1]
+                            r.left = a.pos[0] - self.draw_offset[0] - r.width/2 + centre_offset[0] + rel_pos[0]
+                            r.top = a.pos[1] - self.draw_offset[1] - r.height/2 + centre_offset[1] + rel_pos[1]
                             surface.blit(ability_img, r)
                     
                     # Selection box?
@@ -192,8 +192,8 @@ class BattleScreen (screen.Screen):
             
             bullet_img = self.engine.images[b.image].get()
             r = pygame.Rect(bullet_img.get_rect())
-            r.left = b.pos[0] + self.draw_offset[0] - b.width/2
-            r.top = b.pos[1] + self.draw_offset[1] - b.height/2
+            r.left = b.pos[0] - self.draw_offset[0] - b.width/2
+            r.top = b.pos[1] - self.draw_offset[1] - b.height/2
             
             # Only draw bullets within the screen
             if r.right > self.draw_area[0] and r.left < self.draw_area[2]:
@@ -208,8 +208,8 @@ class BattleScreen (screen.Screen):
         # Draw effects last
         for i, e in enumerate(self.sim.effects):
             r = pygame.Rect(e.rect)
-            r.left = e.rect.left + self.draw_offset[0]
-            r.top = e.rect.top + self.draw_offset[1]
+            r.left = e.rect.left - self.draw_offset[0]
+            r.top = e.rect.top - self.draw_offset[1]
             
             # Only draw effects within the screen
             if r.right > self.draw_area[0] and r.left < self.draw_area[2]:

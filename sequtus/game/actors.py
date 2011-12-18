@@ -123,8 +123,8 @@ class Actor (object_base.ObjectBase):
             self._health_bar = (s, self.hp)
         
         hp_rect = pygame.Rect(
-            self.rect.left + scroll_x,
-            self.rect.top + scroll_y - 4,
+            self.rect.left - scroll_x,
+            self.rect.top - scroll_y - 4,
             self.rect.width,
             3
         )
@@ -146,8 +146,8 @@ class Actor (object_base.ObjectBase):
             self._completion_bar = (s, self.completion)
         
         comp_rect = pygame.Rect(
-            self.rect.left + scroll_x,
-            self.rect.top + scroll_y - 8,
+            self.rect.left - scroll_x,
+            self.rect.top - scroll_y - 8,
             self.rect.width,
             3
         )
