@@ -234,16 +234,23 @@ class BattleScreen (screen.Screen):
                 else:
                     c.draw(surface)
             
-            # surface.blit(*p.image())
+            surface.blit(*p.image())
         
         # Dragrect
-        print(self.scroll_x, self.scroll_y)
-        # print(self.scrolled_mousedown_at, self.scrolled_mousedrag_at)
-        if self.scrolled_mousedown_at != None and self.scrolled_mousedrag_at != None:
-            drag_rect = [
-                self.scrolled_mousedown_at[0], self.scrolled_mousedown_at[1],
-                self.scrolled_mousedrag_at[0], self.scrolled_mousedrag_at[1],
-            ]
+        if self.scrolled_mousedown_at != None and self.true_mousedrag_at != None:
+            x1, y1 = self.true_mousedown_at[:]
+            x1 += self.scroll_at_mousedown[0] - self.scroll_x
+            y1 += self.scroll_at_mousedown[1] - self.scroll_y
+            
+            x2 = self.true_mousedrag_at[0]
+            y2 = self.true_mousedrag_at[1]
+            
+            # Turn it into width/height
+            w = x2 - x1
+            h = y2 - y1
+            
+            # X, Y, Width, Height
+            drag_rect = [x1,y1, w,h]
             
             pygame.draw.rect(surface, (255, 255, 255), drag_rect, 1)
         
@@ -337,6 +344,8 @@ class BattleScreen (screen.Screen):
                         print("Kwargs: %s" % c.mouseup_kwargs)
                         raise
         
+        self.mouse_is_down = False
+        
         # Is there a callback setup for a mouseup?
         if self.mouseup_callback:
             callback_func, kwargs = self.mouseup_callback, self.mouseup_callback_kwargs
@@ -349,27 +358,35 @@ class BattleScreen (screen.Screen):
             return callback_func(event, drag, **kwargs)
         
         # Now the main event
-        mods = pygame.key.get_mods()
         scrolled_mouse_pos = (
-            event.pos[0] - self.scroll_x,
-            event.pos[1] - self.scroll_y
+            event.pos[0] + self.scroll_x,
+            event.pos[1] + self.scroll_y
         )
         
-        # Left click
-        if event.button == 1:
-            if not drag:
-                self._left_click(event)
-        
-        # Right click
-        elif event.button == 3:
-            self._right_click(event)
-            if len(self.sim.selected_actors) == 0:
-                return
+        if scrolled_mouse_pos == self.scrolled_mousedown_at:
+            # Left click
+            if event.button == 1:
+                if not drag:
+                    self._left_click(event)
+
+            # Right click
+            elif event.button == 3:
+                self._right_click(event)
+                if len(self.sim.selected_actors) == 0:
+                    return
+
+                self._right_click(event)
+
+            else:
+                print("battle_screen.handle_mouseup: event.button = %s" % event.button)
             
-            self._right_click(event)
+            self.handle_mouseup(event, drag=False)
             
         else:
-            print("battle_screen.handle_mouseup: event.button = %s" % event.button)
+            # TODO possibly add distance calc in, if it's just 1 pix then is
+            # it really a mouse drag?
+            self._handle_mousedragup(event)
+            self.handle_mouseup(event, drag=True)
         
         self.mouse_mode = None
     
@@ -377,8 +394,8 @@ class BattleScreen (screen.Screen):
     def _left_click(self, event):
         mods = pygame.key.get_mods()
         scrolled_mouse_pos = (
-            event.pos[0] - self.scroll_x,
-            event.pos[1] - self.scroll_y
+            event.pos[0] + self.scroll_x,
+            event.pos[1] + self.scroll_y
         )
         
         # If there is a mouse mode (such as attack) then we will want to issue
@@ -415,8 +432,8 @@ class BattleScreen (screen.Screen):
     def _right_click(self, event):
         mods = pygame.key.get_mods()
         scrolled_mouse_pos = (
-            event.pos[0] - self.scroll_x,
-            event.pos[1] - self.scroll_y
+            event.pos[0] + self.scroll_x,
+            event.pos[1] + self.scroll_y
         )
         
         # Have we targeted an actor?
@@ -489,12 +506,12 @@ class BattleScreen (screen.Screen):
         self.true_mousedrag_at = None
         self.scrolled_mousedrag_at = None
         
-        if self.scrolled_mousedown_at == None:
-            return self.handle_mousedragup(event, None)
+        # if self.scrolled_mousedown_at == None:
+        #     return self.handle_mousedragup(event, None)
         
         scrolled_mouse_pos = (
-            event.pos[0] - self.scroll_x,
-            event.pos[1] - self.scroll_y
+            event.pos[0] + self.scroll_x,
+            event.pos[1] + self.scroll_y
         )
         
         drag_rect = (
@@ -607,6 +624,10 @@ to delete an actor from the list of selected actors.""")
     
     def selection_changed(self):
         """docstring for selection_changes"""
+        pass
+        
+    def double_left_click_actor(self):
+        """docstring for double_left_click_actor"""
         pass
 
     

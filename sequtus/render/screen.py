@@ -42,6 +42,7 @@ class Screen (object):
         self.scrolled_mousedown_at = None
         self.true_mousedrag_at = None
         self.scrolled_mousedrag_at = None
+        self.scroll_at_mousedown = None
         self.scroll_x, self.scroll_y = 0, 0# Current location scrolled to
         
         # If image == None the colour is used instead
@@ -185,11 +186,14 @@ class Screen (object):
     # Mouse
     def _handle_mousedown(self, event):
         self.true_mousedown_at = event.pos[:]
+        self.scroll_at_mousedown = self.scroll_x, self.scroll_y
         
         self.scrolled_mousedown_at = (
-            event.pos[0] - self.scroll_x,
-            event.pos[1] - self.scroll_y
+            event.pos[0] + self.scroll_x,
+            event.pos[1] + self.scroll_y
         )
+        
+        print(self.scrolled_mousedown_at)
         
         for i, c in self.controls.items():
             if c.contains(event.pos):
@@ -239,8 +243,8 @@ class Screen (object):
         # a normal mouseup. If the down and up are different then it's
         # the end of a drag
         scrolled_mouse_pos = (
-            event.pos[0] - self.scroll_x,
-            event.pos[1] - self.scroll_y
+            event.pos[0] + self.scroll_x,
+            event.pos[1] + self.scroll_y
         )
         
         if scrolled_mouse_pos == self.scrolled_mousedown_at:
@@ -276,7 +280,8 @@ class Screen (object):
             self.handle_mousemotion(event)
     
     def _handle_mousedrag(self, event):
-        scrolled_mouse_pos = (event.pos[0] - self.scroll_x, event.pos[1] - self.scroll_y)
+        scrolled_mouse_pos = (event.pos[0] + self.scroll_x, event.pos[1] + self.scroll_y)
+        self.true_mousedrag_at = event.pos[:]
         self.scrolled_mousedrag_at = scrolled_mouse_pos
         
         if self.scrolled_mousedown_at == None:
@@ -304,8 +309,8 @@ class Screen (object):
             return self.handle_mousedragup(event, None)
         
         scrolled_mouse_pos = (
-            event.pos[0] - self.scroll_x,
-            event.pos[1] - self.scroll_y
+            event.pos[0] + self.scroll_x,
+            event.pos[1] + self.scroll_y
         )
         
         drag_rect = (
