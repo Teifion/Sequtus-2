@@ -237,14 +237,15 @@ class BattleScreen (screen.Screen):
             # surface.blit(*p.image())
         
         # Dragrect
-        if self.mouse_is_down and self.scrolled_mousedrag_at != None:
-            raise Exception("Make sure to not draw over the margin")
+        print(self.scroll_x, self.scroll_y)
+        # print(self.scrolled_mousedown_at, self.scrolled_mousedrag_at)
+        if self.scrolled_mousedown_at != None and self.scrolled_mousedrag_at != None:
             drag_rect = [
                 self.scrolled_mousedown_at[0], self.scrolled_mousedown_at[1],
                 self.scrolled_mousedrag_at[0], self.scrolled_mousedrag_at[1],
             ]
             
-            pygame.draw.rect(surf, (255, 255, 255), drag_rect, 1)
+            pygame.draw.rect(surface, (255, 255, 255), drag_rect, 1)
         
         pygame.display.flip()
     
@@ -306,7 +307,7 @@ class BattleScreen (screen.Screen):
             elif self.scroll_left_key in self.keys_down:
                 self.scroll_left()
             
-            self.next_scroll = time.time() + self.scroll_delay
+            self._next_scroll = time.time() + self.scroll_delay
         
         if len(self.keys_down) > 0:
             self.handle_keyhold()
@@ -407,7 +408,7 @@ class BattleScreen (screen.Screen):
                 self.unselect_all_actors()
             
             for aid, a in self.sim.actors.items():
-                if actor_lib.contains_point(a, scrolled_mouse_pos):
+                if a.contains_point(scrolled_mouse_pos):
                     self.left_click_actor(a)
                     break
         
@@ -478,7 +479,7 @@ class BattleScreen (screen.Screen):
         
         # Now check actors
         for aid, a in self.sim.actors.items():
-            if a.contains_point(first_real_mouse_pos) and a.contains_point(second_real_mouse_pos):
+            if a.contains_point(scrolled_first_click) and a.contains_point(scrolled_second_click):
                 self.double_left_click_actor(a)
                 break
         
@@ -529,26 +530,26 @@ class BattleScreen (screen.Screen):
         self.handle_mousedragup(event, drag_rect)
     
     def scroll_right(self, rate = 1):
-        self.scroll_x -= rate * self.scroll_speed
-        self.scroll_x = max(self.scroll_boundaries[0], self.scroll_x)
-        
-        self.draw_offset[0] = self.scroll_x + self.draw_area[0]
-    
-    def scroll_left(self, rate = 1):
         self.scroll_x += rate * self.scroll_speed
         self.scroll_x = min(self.scroll_boundaries[2], self.scroll_x)
         
         self.draw_offset[0] = self.scroll_x + self.draw_area[0]
+    
+    def scroll_left(self, rate = 1):
+        self.scroll_x -= rate * self.scroll_speed
+        self.scroll_x = max(self.scroll_boundaries[0], self.scroll_x)
+        
+        self.draw_offset[0] = self.scroll_x + self.draw_area[0]
         
     def scroll_down(self, rate = 1):
-        self.scroll_y -= rate * self.scroll_speed
-        self.scroll_y = max(self.scroll_boundaries[1], self.scroll_y)
+        self.scroll_y += rate * self.scroll_speed
+        self.scroll_y = min(self.scroll_boundaries[3], self.scroll_y)
         
         self.draw_offset[1] = self.scroll_y + self.draw_area[1]
         
     def scroll_up(self, rate = 1):
-        self.scroll_y += rate * self.scroll_speed
-        self.scroll_y = min(self.scroll_boundaries[3], self.scroll_y)
+        self.scroll_y -= rate * self.scroll_speed
+        self.scroll_y = max(self.scroll_boundaries[1], self.scroll_y)
         
         self.draw_offset[1] = self.scroll_y + self.draw_area[1]
     
@@ -603,5 +604,9 @@ to delete an actor from the list of selected actors.""")
     #     
     #     self.mouseup_callback = self.place_actor_from_click
     #     self.mouseup_callback_args = [{"type":actor_type}]
+    
+    def selection_changed(self):
+        """docstring for selection_changes"""
+        pass
 
     

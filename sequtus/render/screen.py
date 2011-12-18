@@ -276,6 +276,9 @@ class Screen (object):
             self.handle_mousemotion(event)
     
     def _handle_mousedrag(self, event):
+        scrolled_mouse_pos = (event.pos[0] - self.scroll_x, event.pos[1] - self.scroll_y)
+        self.scrolled_mousedrag_at = scrolled_mouse_pos
+        
         if self.scrolled_mousedown_at == None:
             return self.handle_mousedrag(event, None)
         else:
@@ -284,8 +287,6 @@ class Screen (object):
                 if c.contains(self.true_mousedown_at):
                     c.handle_mousedrag(event)
                 return
-        
-        scrolled_mouse_pos = (event.pos[0] - self.scroll_x, event.pos[1] - self.scroll_y)
         
         drag_rect = (
             min(self.scrolled_mousedown_at[0], scrolled_mouse_pos[0]),

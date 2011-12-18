@@ -13,6 +13,7 @@ class DefaultCore (application_core.EngineV4):
         
         self.load_static_images(
             ["background", "sequtus/defaults/background.png"],
+            ["background", "sequtus/defaults/background_grid.png"],
             ["red_cruiser", "sequtus/defaults/red_cruiser.png"],
             ["red_factory", "sequtus/defaults/red_factory.png"],
         )

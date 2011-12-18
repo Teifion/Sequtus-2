@@ -26,6 +26,18 @@ class ObjectBase (object):
     def __lt__(self, other): return self.oid < other.oid
     def __gt__(self, other): return self.oid > other.oid
     
+    def contains_point(self, point):
+        """Point is a length 2 sequence X, Y"""
+        left = self.pos[0] - self.rect.width/2
+        right = self.pos[0] + self.rect.width/2
+
+        top = self.pos[1] - self.rect.height/2
+        bottom = self.pos[1] + self.rect.height/2
+
+        if left <= point[0] <= right:
+            if top <= point[1] <= bottom:
+                return True
+    
     def new_image(self, img):
         self.image = img
         self.rect = self.image.get_rect()
