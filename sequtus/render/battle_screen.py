@@ -128,8 +128,8 @@ class BattleScreen (screen.Screen):
             # Get the actor's image and rectangle
             # actor_img = self.image_cache[img_name]
             r = pygame.Rect(actor_img.get_rect())
-            r.left = a.pos[0] + self.draw_offset[0] - r.width/2
-            r.top = a.pos[1] + self.draw_offset[1] - r.height/2
+            r.left = a.pos[0] - self.draw_offset[0] - r.width/2
+            r.top = a.pos[1] - self.draw_offset[1] - r.height/2
             
             # Only draw actors within the screen
             if r.right > self.draw_area[0] and r.left < self.draw_area[2]:
