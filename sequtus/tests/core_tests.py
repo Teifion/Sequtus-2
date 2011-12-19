@@ -4,7 +4,7 @@ import unittest
 import covers
 from sequtus.tests import *
 
-def run(args):
+def run(args=None):
     # Tests that don't take long to run
     fast_tests = [
         ai_lib_t.suite,
@@ -15,8 +15,10 @@ def run(args):
         screen_lib_t.suite,
         object_base_t.suite,
         
+        # App core
+        application_t.suite,
+        
         # Screens
-        battle_io_t.suite,
         battle_screen_t.suite,
         battle_sim_t.suite,
     ]
@@ -26,15 +28,20 @@ def run(args):
         screen_t.suite,
     ]
     
-    if args.all:
-        suite = unittest.TestSuite(fast_tests + slow_tests)
+    # Have args been passed?
+    if args:
+        if args.all:
+            suite = unittest.TestSuite(fast_tests + slow_tests)
+        else:
+            suite = unittest.TestSuite(fast_tests)
+        
+        if args.verbose == True:
+            verbosity = 2
+        else:
+            verbosity = 1
     else:
+        # No args, probably an initial test
         suite = unittest.TestSuite(fast_tests)
-    
-    
-    if args.verbose == True:
-        verbosity = 2
-    else:
         verbosity = 1
     
     test_result = unittest.TextTestRunner(verbosity=verbosity).run(suite)

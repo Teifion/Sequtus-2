@@ -185,6 +185,7 @@ class Screen (object):
     
     # Mouse
     def _handle_mousedown(self, event):
+        self.mouse_is_down = True
         self.true_mousedown_at = event.pos[:]
         self.scroll_at_mousedown = self.scroll_x, self.scroll_y
         
@@ -192,8 +193,6 @@ class Screen (object):
             event.pos[0] + self.scroll_x,
             event.pos[1] + self.scroll_y
         )
-        
-        print(self.scrolled_mousedown_at)
         
         for i, c in self.controls.items():
             if c.contains(event.pos):
@@ -214,8 +213,7 @@ class Screen (object):
         self.handle_mousedown(event)
     
     def _handle_mouseup(self, event):
-        self.true_mousedown_at = None
-        self.scrolled_mousedown_at = None
+        self.mouse_is_down = False
         
         # If it's been less than X seconds since the last click
         # then it is a double click
@@ -302,9 +300,6 @@ class Screen (object):
         self.handle_mousedrag(event, drag_rect)
     
     def _handle_mousedragup(self, event):
-        self.true_mousedrag_at = None
-        self.scrolled_mousedrag_at = None
-        
         if self.scrolled_mousedown_at == None:
             return self.handle_mousedragup(event, None)
         

@@ -79,5 +79,9 @@ class ScreenTests(unittest.TestCase):
         first_click = pygame.event.Event(MOUSEBUTTONUP, button=1, pos=(80,80))
         second_click = pygame.event.Event(MOUSEBUTTONUP, button=1, pos=(100,100))
         s._handle_doubleclick(first_click, second_click)
+    
+    def test_click_actor(self):
+        pass
+
 
 suite = unittest.TestLoader().loadTestsFromTestCase(ScreenTests)

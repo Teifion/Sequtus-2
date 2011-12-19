@@ -1,0 +1,53 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+        <title>Sequtus documentation: Installation</title>
+        <link href="../style.css" rel="stylesheet" type="text/css" />
+        <link href="../syntax/css.css" rel="stylesheet" type="text/css" />
+        <script language="javascript" src="../syntax/shCore.js"></script>
+        <script language="javascript" src="../syntax/shBrushPython.js"></script>
+    </head>
+    <body onload="dp.SyntaxHighlighter.HighlightAll('code');">
+        Installation is as simple making sure you have PyGame installed and
+        placing the sequtus folder in either your python path or the project folder.
+        <br /><br />
+        
+        The most bare bones program you can create would be something like this.
+        It sets up an engine, battle_screen and battle_sim.
+        <pre name="code" class="python">
+from sequtus.game import application_core
+from sequtus.render import battle_screen
+from sequtus.game import battle_sim
+
+class DefaultCore (application_core.EngineV4):
+    def __init__(self, test_sim=True):
+        super(DefaultCore, self).__init__()
+        
+        self.load_static_images(
+            ["background", "sequtus/defaults/background.png"],
+            ["red_cruiser", "sequtus/defaults/red_cruiser.png"],
+            ["red_factory", "sequtus/defaults/red_factory.png"],
+        )
+        
+        s = DefaultSim(
+            engine = self,
+            scenario = "sequtus/defaults/scenario.json",
+            game_data = "sequtus/defaults/game_data.json",
+        )
+        
+        self.screens['battle'] = battle.DefaultBattle(self, [640, 480], sim=s)
+
+class DefaultBattle (battle_screen.BattleScreen):
+    def __init__(self, engine, *args, **kwargs):
+        super(DefaultBattle, self).__init__(engine, *args, **kwargs)
+        self.background_image = self.engine.images["background"]
+
+class DefaultSim (battle_sim.BattleSim):
+    pass
+
+if __name__ == '__main__':
+    g = DefaultCore()
+    g.start("battle")
+        </pre>
+    </body>
+</html>

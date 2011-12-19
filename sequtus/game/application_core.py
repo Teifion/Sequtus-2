@@ -116,8 +116,12 @@ class EngineV4 (object):
         # we thus need to make it a relative path
         regex_result = root_path.search(sys.argv[0])
         
-        root = regex_result.groups()[0]
-        if root == None: root = ""
+        root = None
+        if regex_result != None:
+            root = regex_result.groups()[0]
+        
+        if root == None:
+            root = ""
         
         for i in images:
             # Name and Location

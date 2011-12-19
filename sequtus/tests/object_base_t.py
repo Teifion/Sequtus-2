@@ -32,7 +32,7 @@ class ObjectBaseTests(unittest.TestCase):
         )
         
         for point, ob, expected in test_data:
-            result = actor_lib.contains_point(ob, point)
+            result = ob.contains_point(point)
             
             self.assertEqual(result, expected)
 

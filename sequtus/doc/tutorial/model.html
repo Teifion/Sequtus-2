@@ -1,0 +1,23 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+        <title>Sequtus documentation: render.screen</title>
+        <link href="../style.css" rel="stylesheet" type="text/css" media="all" />
+    </head>
+    <body>
+        Sequtus runs on a simple model
+        <br /><br />
+        
+        <img src="../images/model.png" />
+        <br /><br />
+        
+        <ul>
+            <li>The main program creates an <a href="../game/application_core.html">Application Core</a></li>
+            <li>This creates one or more <a href="../render/screen.html">Screens</a></li>
+            <li><a href="../render/battle_screen.html">Battle Screens</a> are a subclass of Screens for use as part of the core "game", these handle player IO input (keyboard and mouse)</li>
+            <li>Battle Screens all have a <a href="../game/battle_sim.html">Simulator</a> which is responsible for the processing side of things</li>
+            <li>Simulators spawn <a href="../ai/TODO.html">AI processes</a> to run any computer teams they are responsible for</li>
+            <li>Simulators also connect to a <a href="../server/TODO.html">Game Server</a> to allow network play</li>
+        </ul>
+    </body>
+</html>

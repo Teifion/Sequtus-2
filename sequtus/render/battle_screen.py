@@ -238,21 +238,22 @@ class BattleScreen (screen.Screen):
         
         # Dragrect
         if self.scrolled_mousedown_at != None and self.true_mousedrag_at != None:
-            x1, y1 = self.true_mousedown_at[:]
-            x1 += self.scroll_at_mousedown[0] - self.scroll_x
-            y1 += self.scroll_at_mousedown[1] - self.scroll_y
+            if pygame.mouse.get_pressed()[0] == 1:
+                x1, y1 = self.true_mousedown_at[:]
+                x1 += self.scroll_at_mousedown[0] - self.scroll_x
+                y1 += self.scroll_at_mousedown[1] - self.scroll_y
             
-            x2 = self.true_mousedrag_at[0]
-            y2 = self.true_mousedrag_at[1]
+                x2 = self.true_mousedrag_at[0]
+                y2 = self.true_mousedrag_at[1]
             
-            # Turn it into width/height
-            w = x2 - x1
-            h = y2 - y1
+                # Turn it into width/height
+                w = x2 - x1
+                h = y2 - y1
             
-            # X, Y, Width, Height
-            drag_rect = [x1,y1, w,h]
+                # X, Y, Width, Height
+                drag_rect = [x1,y1, w,h]
             
-            pygame.draw.rect(surface, (255, 255, 255), drag_rect, 1)
+                pygame.draw.rect(surface, (255, 255, 255), drag_rect, 1)
         
         pygame.display.flip()
     
@@ -273,13 +274,13 @@ class BattleScreen (screen.Screen):
         
         # Are they altering the mouse mode?
         if event.key in self.hotkeys:
-            if len(self.sim.selected_actors) > 0:
+            if len(self.selected_actors) > 0:
                 if self.hotkeys[event.key] == "move":
                     self.mouse_mode = "move"
                     
                 if self.hotkeys[event.key] == "stop":
-                    for a in self.sim.selected_actors:
-                        if a.team == self.player_team:
+                    for a in self.selected_actors:
+                        if a.team == self.sim.player_team:
                             if KMOD_SHIFT & mods:
                                 self.queue_order(a, "stop")
                             else:
@@ -320,8 +321,7 @@ class BattleScreen (screen.Screen):
             self.handle_keyhold()
     
     def _handle_mouseup(self, event, drag=False):
-        self.true_mousedown_at = None
-        self.scrolled_mousedown_at = None
+        self.mouse_is_down = False
         
         # If it's been less than X seconds since the last click
         # then it is a double click
@@ -372,7 +372,7 @@ class BattleScreen (screen.Screen):
             # Right click
             elif event.button == 3:
                 self._right_click(event)
-                if len(self.sim.selected_actors) == 0:
+                if len(self.selected_actors) == 0:
                     return
 
                 self._right_click(event)
@@ -390,7 +390,6 @@ class BattleScreen (screen.Screen):
         
         self.mouse_mode = None
     
-    
     def _left_click(self, event):
         mods = pygame.key.get_mods()
         scrolled_mouse_pos = (
@@ -405,19 +404,19 @@ class BattleScreen (screen.Screen):
             # Have we selected an actor to target?
             actor_target = None
             for aid, a in self.sim.actors.items():
-                if actor_lib.contains_point(a, real_mouse_pos):
+                if a.contains_point(scrolled_mouse_pos):
                     actor_target = weakref.ref(a)()
                     break
             
             # Immidiate or Queued?
             if KMOD_SHIFT & mods:
-                for a in self.sim.selected_actors:
-                    if a.team == self.player_team:
-                        self.queue_order(a, self.key_mod, pos=real_mouse_pos, target=actor_target)
+                for a in self.selected_actors:
+                    if a.team == self.sim.player_team:
+                        self.queue_order(a, self.key_mod, pos=scrolled_mouse_pos, target=actor_target)
             else:
-                for a in self.sim.selected_actors:
-                    if a.team == self.player_team:
-                        self.add_order(a, self.key_mod, pos=real_mouse_pos, target=actor_target)
+                for a in self.selected_actors:
+                    if a.team == self.sim.player_team:
+                        self.add_order(a, self.key_mod, pos=scrolled_mouse_pos, target=actor_target)
         
         # No mouse order, we're just looking to select an actor
         else:
@@ -430,6 +429,10 @@ class BattleScreen (screen.Screen):
                     break
         
     def _right_click(self, event):
+        # Have we got a selected actor?
+        if len(self.selected_actors) < 1:
+            return
+        
         mods = pygame.key.get_mods()
         scrolled_mouse_pos = (
             event.pos[0] + self.scroll_x,
@@ -439,31 +442,31 @@ class BattleScreen (screen.Screen):
         # Have we targeted an actor?
         actor_target = None
         for aid, a in self.sim.actors.items():
-            if actor_lib.contains_point(a, real_mouse_pos):
+            if a.contains_point(scrolled_mouse_pos):
                 actor_target = weakref.ref(a)()
                 break
         
         # No actor clicked, this means we're moving
         if not actor_target:
-            for a in self.sim.selected_actors:
-                if a.team == self.player_team:
+            for a in self.selected_actors:
+                if a.team == self.sim.player_team:
                     if KMOD_SHIFT & mods:
-                        self.queue_order(a, "move", pos=real_mouse_pos)
+                        self.queue_order(a, "move", pos=scrolled_mouse_pos)
                     else:
-                        self.add_order(a, "move", pos=real_mouse_pos)
+                        self.add_order(a, "move", pos=scrolled_mouse_pos)
                     
         # An actor was clicked, we could be moving, attacking etc
         else:
-            if actor_target.team != self.sim.selected_actors[0].team:
-                for a in self.sim.selected_actors:
-                    if a.team == self.player_team:
+            if actor_target.team != self.selected_actors[0].team:
+                for a in self.selected_actors:
+                    if a.team == self.sim.player_team:
                         if KMOD_SHIFT & mods:
                             self.queue_order(a, "attack", target=actor_target)
                         else:
                             self.add_order(a, "attack", target=actor_target)
             else:
-                for a in self.sim.selected_actors:
-                    if a.team == self.player_team:
+                for a in self.selected_actors:
+                    if a.team == self.sim.player_team:
                         if KMOD_SHIFT & mods:
                             self.queue_order(a, "aid", target=actor_target)
                         else:
@@ -506,8 +509,8 @@ class BattleScreen (screen.Screen):
         self.true_mousedrag_at = None
         self.scrolled_mousedrag_at = None
         
-        # if self.scrolled_mousedown_at == None:
-        #     return self.handle_mousedragup(event, None)
+        if self.scrolled_mousedown_at == None:
+            return self.handle_mousedragup(event, None)
         
         scrolled_mouse_pos = (
             event.pos[0] + self.scroll_x,
@@ -523,6 +526,8 @@ class BattleScreen (screen.Screen):
         
         contains_friendly = False
         short_list = []
+        
+        mods = pygame.key.get_mods()
         if event.button == 1:
             if not KMOD_SHIFT & mods:
                 self.unselect_all_actors()
@@ -532,17 +537,17 @@ class BattleScreen (screen.Screen):
             # should only select the friendlies
             for aid, a in self.sim.actors.items():
                 if actor_lib.is_inside(a, drag_rect):
-                    if a.team == self.player_team:
+                    if a.team == self.sim.player_team:
                         contains_friendly = True
                     short_list.append(a)
             
             # Now to select them
             for a in short_list:
                 if contains_friendly:
-                    if a.team == self.player_team:
-                        self.sim.select_actor(a)
+                    if a.team == self.sim.player_team:
+                        self.select_actor(a)
                 else:
-                    self.sim.select_actor(a)
+                    self.select_actor(a)
         
         self.handle_mousedragup(event, drag_rect)
     
@@ -595,7 +600,9 @@ class BattleScreen (screen.Screen):
         for a in self.selected_actors[:]:
             del(self.selected_actors[self.selected_actors.index(a)])
             a.selected = False
-            self._selection_has_changed = True
+        
+        self._selection_has_changed = True
+        self.selected_actors = []
     
     def unselect_actor(self, a):
         try:

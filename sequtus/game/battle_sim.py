@@ -61,6 +61,9 @@ class BattleSim (object):
         self.bullets = []
         self.effects = []
         
+        # The team of our player
+        self.player_team = -1
+        
         # Used to store orders for X steps later
         # http://www.gamasutra.com/view/feature/3094/1500_archers_on_a_288_network_.php
         self.orders = {}
@@ -119,6 +122,7 @@ class BattleSim (object):
             self.quit()
             raise
     
+    # These are the "public" handles to queue orders to be sent to the server
     def add_order(self, the_actor, command, pos=None, target=None):
         """Sets the order for a given actor"""
         if type(the_actor) == int:
@@ -130,6 +134,14 @@ class BattleSim (object):
         if type(the_actor) == int:
             the_actor = self.actors[the_actor]
         self.q_orders[self.tick + self.tick_jump].append((the_actor, command, pos, target))
+    
+    # These functions actually add the order when the network says so
+    def _real_add_order(self):
+        pass
+    
+    def _real_queue_order(self):
+        """docstring for _"""
+        pass
     
     def quit(self, event=None):
         for k, q in self.out_queues.items():
