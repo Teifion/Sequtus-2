@@ -282,9 +282,9 @@ class BattleScreen (screen.Screen):
                     for a in self.selected_actors:
                         if a.team == self.sim.player_team:
                             if KMOD_SHIFT & mods:
-                                self.queue_order(a, "stop")
+                                self.sim.queue_order(a, "stop")
                             else:
-                                self.add_order(a, "stop")
+                                self.sim.add_order(a, "stop")
                     
                 if self.hotkeys[event.key] == "attack":
                     self.mouse_mode = "attack"
@@ -412,11 +412,11 @@ class BattleScreen (screen.Screen):
             if KMOD_SHIFT & mods:
                 for a in self.selected_actors:
                     if a.team == self.sim.player_team:
-                        self.queue_order(a, self.key_mod, pos=scrolled_mouse_pos, target=actor_target)
+                        self.sim.queue_order(a, self.key_mod, pos=scrolled_mouse_pos, target=actor_target)
             else:
                 for a in self.selected_actors:
                     if a.team == self.sim.player_team:
-                        self.add_order(a, self.key_mod, pos=scrolled_mouse_pos, target=actor_target)
+                        self.sim.add_order(a, self.key_mod, pos=scrolled_mouse_pos, target=actor_target)
         
         # No mouse order, we're just looking to select an actor
         else:
@@ -451,26 +451,26 @@ class BattleScreen (screen.Screen):
             for a in self.selected_actors:
                 if a.team == self.sim.player_team:
                     if KMOD_SHIFT & mods:
-                        self.queue_order(a, "move", pos=scrolled_mouse_pos)
+                        self.sim.queue_order(a, "move", pos=scrolled_mouse_pos)
                     else:
-                        self.add_order(a, "move", pos=scrolled_mouse_pos)
-                    
+                        self.sim.add_order(a, "move", pos=scrolled_mouse_pos)
+        
         # An actor was clicked, we could be moving, attacking etc
         else:
             if actor_target.team != self.selected_actors[0].team:
                 for a in self.selected_actors:
                     if a.team == self.sim.player_team:
                         if KMOD_SHIFT & mods:
-                            self.queue_order(a, "attack", target=actor_target)
+                            self.sim.queue_order(a, "attack", target=actor_target)
                         else:
-                            self.add_order(a, "attack", target=actor_target)
+                            self.sim.add_order(a, "attack", target=actor_target)
             else:
                 for a in self.selected_actors:
                     if a.team == self.sim.player_team:
                         if KMOD_SHIFT & mods:
-                            self.queue_order(a, "aid", target=actor_target)
+                            self.sim.queue_order(a, "aid", target=actor_target)
                         else:
-                            self.add_order(a, "aid", target=actor_target)
+                            self.sim.add_order(a, "aid", target=actor_target)
     
     def _handle_doubleclick(self, first_click, second_click):
         for i, c in self.controls.items():
@@ -604,21 +604,29 @@ class BattleScreen (screen.Screen):
         self._selection_has_changed = True
         self.selected_actors = []
     
-    def unselect_actor(self, a):
-        try:
-            a.selected = False
-            del(self.selected_actors[self.selected_actors.index(a)])
-        except Exception as e:
-            print("""! battle_screen.unselect_actor had an exception trying
-to delete an actor from the list of selected actors.""")
+    def unselect_actor(self, *actors):
+        for a in actors:
+            if type(a) == int:
+                a = self.sim.actors[a]
         
-        a.selected = False
-        self._selection_has_changed = True
+            try:
+                a.selected = False
+                del(self.selected_actors[self.selected_actors.index(a)])
+            except Exception as e:
+                print("""! battle_screen.unselect_actor had an exception trying
+    to delete an actor from the list of selected actors.""")
+        
+            a.selected = False
+            self._selection_has_changed = True
     
-    def select_actor(self, a):
-        self.selected_actors.append(a)
-        a.selected = True
-        self._selection_has_changed = True
+    def select_actor(self, *actors):
+        for a in actors:
+            if type(a) == int:
+                a = self.sim.actors[a]
+        
+            self.selected_actors.append(a)
+            a.selected = True
+            self._selection_has_changed = True
     
     # def place_actor_mode(self, actor_type):
     #     """Used to enter placement mode where an icon hovers beneath the

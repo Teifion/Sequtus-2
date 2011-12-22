@@ -52,7 +52,7 @@ for a, b, t in attribute_list:
 
 
 class BattleSim (object):
-    def __init__(self, engine, scenario, game_data, config=None):
+    def __init__(self, engine, player_team, scenario, game_data, config=None):
         super(BattleSim, self).__init__()
         
         self.engine = engine
@@ -117,7 +117,7 @@ class BattleSim (object):
         
         # Now load it all up, if we error here we want to kill our threads
         try:
-            self.load_all(scenario, game_data, config)
+            self.load_all(player_team, scenario, game_data, config)
         except Exception as e:
             self.quit()
             raise
@@ -430,9 +430,12 @@ class BattleSim (object):
         
         return self.actor_lookup[a.oid]
     
-    def load_all(self, scenario, game_data, config=None, local_paths=True):
+    def load_all(self, player_team, scenario, game_data, config=None, local_paths=True):
         """Can be passed strings or dictionaries.
         Strings are filepaths and dicts are pre-loaded data"""
+        
+        # We need to know what side we are
+        self.player_team = player_team
         
         # It might be we're after local paths
         if local_paths:

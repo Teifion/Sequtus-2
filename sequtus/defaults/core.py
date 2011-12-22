@@ -8,7 +8,7 @@ def temp_engine():
     return e
 
 class DefaultCore (application_core.EngineV4):
-    def __init__(self, test_sim=True):
+    def __init__(self, test_sim=True, player_team=1):
         super(DefaultCore, self).__init__()
         
         self.load_static_images(
@@ -22,12 +22,14 @@ class DefaultCore (application_core.EngineV4):
         
         if test_sim:
             s = sim.TestSim(
+                player_team = player_team,
                 engine = self,
                 scenario = "sequtus/defaults/scenario.json",
                 game_data = "sequtus/defaults/game_data.json",
             )
         else:
             s = sim.DefaultSim(
+                player_team = player_team,
                 engine = self,
                 scenario = "sequtus/defaults/scenario.json",
                 game_data = "sequtus/defaults/game_data.json",
