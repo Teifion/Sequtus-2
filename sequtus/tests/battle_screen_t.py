@@ -7,79 +7,74 @@ from sequtus.defaults import core
 from sequtus.render import battle_screen
 from sequtus.tests import application_t
 
-BS = battle_screen.BattleScreen
-
-class FakeSim (object):
-    actors = {}
-    def unselect_all_actors(self): pass
-
 class BattleScreenTests(unittest.TestCase):
     def test_handle_active(self):
-        s = BS(engine=core.temp_engine(), dimensions=[800, 600], fullscreen=False)
-        s._handle_active(pygame.event.Event(ACTIVEEVENT))
-        
-        # pygame.event.Event(3, button=1, pos=(1, 1))
+        with application_t.TestCore() as c:
+            c.current_screen._handle_active(pygame.event.Event(ACTIVEEVENT))
     
     def test_handle_keydown(self):
-        s = BS(engine=core.temp_engine(), dimensions=[800, 600], fullscreen=False)
-        event = pygame.event.Event(KEYDOWN, key=113)
-        s._handle_keydown(event)
+        with application_t.TestCore() as c:
+            event = pygame.event.Event(KEYDOWN, key=113)
+            c.current_screen._handle_keydown(event)
     
     def test_handle_keyhold(self):
-        s = BS(engine=core.temp_engine(), dimensions=[800, 600], fullscreen=False)
-        event = None
-        s._handle_keyhold()
+        with application_t.TestCore() as c:
+            event = None
+            c.current_screen._handle_keyhold()
     
     def test_handle_keyup(self):
-        s = BS(engine=core.temp_engine(), dimensions=[800, 600], fullscreen=False)
-        event = pygame.event.Event(KEYUP, key=113)
-        s._handle_keyup(event)
+        with application_t.TestCore() as c:
+            event = pygame.event.Event(KEYUP, key=113)
+            c.current_screen._handle_keyup(event)
 
     def test_handle_mousemotion(self):
-        s = BS(engine=core.temp_engine(), dimensions=[800, 600], fullscreen=False)
-        event = None
-        s._handle_mousemotion(event)
+        with application_t.TestCore() as c:
+            event = None
+            c.current_screen._handle_mousemotion(event)
 
     def test_handle_mousedown(self):
-        s = BS(engine=core.temp_engine(), dimensions=[800, 600], fullscreen=False)
-        event = pygame.event.Event(MOUSEBUTTONDOWN, button=1, pos=(100,100))
-        s._handle_mousedown(event)
+        with application_t.TestCore() as c:
+            event = pygame.event.Event(MOUSEBUTTONDOWN, button=1, pos=(100,100))
+            c.current_screen._handle_mousedown(event)
     
     def test_handle_mouseup(self):
-        s = BS(engine=core.temp_engine(), dimensions=[800, 600], fullscreen=False)
-        s.sim = FakeSim()
+        with application_t.TestCore() as c:
+            c.current_screen.unselect_all_actors = lambda: 1
+            
+            # Left click
+            c.current_screen._handle_mouseup(pygame.event.Event(MOUSEBUTTONUP, button=1, pos=(500,500)))
+            
+            # Left click with a mouse mode
+            c.current_screen.mouse_mode = "move"
+            c.current_screen._handle_mouseup(pygame.event.Event(MOUSEBUTTONUP, button=1, pos=(500,500)))
         
-        s.unselect_all_actors = lambda: 1
-        
-        # Left click
-        s._handle_mouseup(pygame.event.Event(MOUSEBUTTONUP, button=1, pos=(100,100)))
-        
-        # Left click with a mouse mode
-        s.mouse_mode = "move"
-        s._handle_mouseup(pygame.event.Event(MOUSEBUTTONUP, button=1, pos=(100,100)))
-        s.mouse_mode = None
-        
-        # Right click
-        s._handle_mouseup(pygame.event.Event(MOUSEBUTTONUP, button=3, pos=(100,100)))
+            # Right click
+            c.current_screen.mouse_mode = None
+            c.current_screen._handle_mouseup(pygame.event.Event(MOUSEBUTTONUP, button=3, pos=(500,500)))
 
     def test_handle_mousedrag(self):
-        s = BS(engine=core.temp_engine(), dimensions=[800, 600], fullscreen=False)
-        event = pygame.event.Event(MOUSEMOTION, pos=(100,100))
-        s._handle_mousedrag(event)
+        with application_t.TestCore() as c:
+            event = pygame.event.Event(MOUSEMOTION, pos=(100,100))
+            c.current_screen._handle_mousedrag(event)
     
     def test_handle_mousedragup(self):
-        s = BS(engine=core.temp_engine(), dimensions=[800, 600], fullscreen=False)
-        event = pygame.event.Event(MOUSEBUTTONUP, button=1, pos=(100,100))
-        s._handle_mousedragup(event)
+        with application_t.TestCore() as c:
+            event = pygame.event.Event(MOUSEBUTTONUP, button=1, pos=(100,100))
+            c.current_screen._handle_mousedragup(event)
 
     def test_handle_doubleclick(self):
-        s = BS(engine=core.temp_engine(), dimensions=[800, 600], fullscreen=False)
-        s.sim = FakeSim()
+        with application_t.TestCore() as c:
+            first_click = pygame.event.Event(MOUSEBUTTONUP, button=1, pos=(500, 500))
+            second_click = pygame.event.Event(MOUSEBUTTONUP, button=1, pos=(500, 500))
         
-        first_click = pygame.event.Event(MOUSEBUTTONUP, button=1, pos=(80,80))
-        second_click = pygame.event.Event(MOUSEBUTTONUP, button=1, pos=(100,100))
-        
-        s._handle_doubleclick(first_click, second_click)
+            c.current_screen._handle_doubleclick(first_click, second_click)
+    
+    def test_doubleclick_actor(self):
+        with application_t.TestCore() as c:
+            first_click = pygame.event.Event(MOUSEBUTTONUP, button=1, pos=(94, 120))
+            second_click = pygame.event.Event(MOUSEBUTTONUP, button=1, pos=(94, 120))
+            
+            c.current_screen._handle_doubleclick(first_click, second_click)
     
     def test_click_actor(self):
         # Left click
