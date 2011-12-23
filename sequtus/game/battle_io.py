@@ -17,47 +17,6 @@ class BattleIO (screen.Screen):
     def __init__(self, engine):
         super(BattleIO, self).__init__(engine, engine.screen_size)
     
-    def double_left_click_actor(self, act):
-        mods = pygame.key.get_mods()
-        actors_to_select = []
-        
-        scr_rect = (
-            -self.scroll_x + self.draw_area[0],
-            -self.scroll_y + self.draw_area[1],
-            -self.scroll_x + self.draw_area[2],
-            -self.scroll_y + self.draw_area[3]
-        )
-        
-        for aid, a in self.actors.items():
-            if a.actor_type == act.actor_type:
-                if actor_lib.is_inside(a, scr_rect):
-                    actors_to_select.append(a)
-        
-        if KMOD_SHIFT & mods:
-            # Add to current selection
-            for a in actors_to_select:
-                self.select_actor(a)
-        else:
-            self.selected_actors = []
-            
-            # Set as current selection
-            for a in actors_to_select:
-                self.select_actor(a)
-        
-        self._selection_has_changed = True
-
-    
-    def update(self):
-        # It might be that the mouse is scrolling
-        # but we only use this if there are no arrow keys held down
-        if self.allow_mouse_scroll:
-            if self.scroll_up_key not in self.keys_down:
-                if self.scroll_down_key not in self.keys_down:
-                    if self.scroll_right_key not in self.keys_down:
-                        if self.scroll_left_key not in self.keys_down:
-                            # None of our scroll keys are down, we can mouse scroll
-                            self.check_mouse_scroll()
-    
     def check_mouse_scroll(self):
         left_val = self.scroll_boundary - (self.engine.window_width - self.mouse[0])
         right_val = self.scroll_boundary - self.mouse[0]

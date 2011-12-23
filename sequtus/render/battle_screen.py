@@ -641,8 +641,33 @@ class BattleScreen (screen.Screen):
         """docstring for selection_changes"""
         pass
         
-    def double_left_click_actor(self):
-        """docstring for double_left_click_actor"""
-        pass
+    def double_left_click_actor(self, the_actor):
+        mods = pygame.key.get_mods()
+        actors_to_select = []
+
+        scr_rect = (
+            -self.scroll_x + self.draw_area[0],
+            -self.scroll_y + self.draw_area[1],
+            -self.scroll_x + self.draw_area[2],
+            -self.scroll_y + self.draw_area[3]
+        )
+
+        for aid, a in self.sim.actors.items():
+            if a.actor_type == the_actor.actor_type:
+                if actor_lib.is_inside(a, scr_rect):
+                    actors_to_select.append(a)
+
+        if KMOD_SHIFT & mods:
+            # Add to current selection
+            for a in actors_to_select:
+                self.select_actor(a)
+        else:
+            self.selected_actors = []
+
+            # Set as current selection
+            for a in actors_to_select:
+                self.select_actor(a)
+        
+        self._selection_has_changed = True
 
     
