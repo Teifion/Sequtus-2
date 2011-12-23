@@ -71,6 +71,8 @@ class BattleSim (object):
         self.tick = 0
         self.tick_jump = 3
         
+        self.orders_to_send = []
+        self.orders_to_queue = []
         for i in range(self.tick_jump+1):
             self.orders[i] = []
             self.q_orders[i] = []
@@ -125,23 +127,32 @@ class BattleSim (object):
     # These are the "public" handles to queue orders to be sent to the server
     def add_order(self, the_actor, command, pos=None, target=None):
         """Sets the order for a given actor"""
-        if type(the_actor) == int:
-            the_actor = self.actors[the_actor]
-        self.orders[self.tick + self.tick_jump].append((the_actor, command, pos, target))
+        if type(the_actor) != int:
+            the_actor = the_actor.oid
+        
+        if type(target) != int and target != None:
+            target = target.oid
+        
+        self.orders_to_send.append((the_actor, command, pos, target))
     
     def queue_order(self, the_actor, command, pos=None, target=None):
         """Adds an order to the queue for a given actor"""
-        if type(the_actor) == int:
-            the_actor = self.actors[the_actor]
-        self.q_orders[self.tick + self.tick_jump].append((the_actor, command, pos, target))
+        if type(the_actor) != int:
+            the_actor = the_actor.oid
+        
+        if type(target) != int and target != None:
+            target = target.oid
+        
+        self.orders_to_queue.append((the_actor, command, pos, target))
     
     # These functions actually add the order when the network says so
-    def _real_add_order(self):
-        pass
+    def _real_add_order(self, tick, actor_id, command, pos, target):
+        raise Exception("Not implemented")
+        the_actor = self.actors[actor_id]
+        self.orders_to_send[tick].append((the_actor, command, pos, target))
     
     def _real_queue_order(self):
-        """docstring for _"""
-        pass
+        raise Exception("Not implemented")
     
     def quit(self, event=None):
         for k, q in self.out_queues.items():
