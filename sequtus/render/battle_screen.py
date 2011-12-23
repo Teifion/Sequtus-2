@@ -669,5 +669,15 @@ class BattleScreen (screen.Screen):
                 self.select_actor(a)
         
         self._selection_has_changed = True
-
+    
+    def assign_control_group(self, key):
+        self.control_groups[key] = [a.oid for a in self.sim.actors]
+    
+    def select_control_group(self, key):
+        if len(self.control_groups[key]) > 0:
+            self.unselect_all_actors()
+            for a in self.control_groups[key][:]:
+                self.select_actor(a)
+            
+            self._selection_has_changed = True
     

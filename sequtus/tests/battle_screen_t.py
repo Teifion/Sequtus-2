@@ -194,7 +194,13 @@ class BattleScreenTests(unittest.TestCase):
             
             self.assertEqual(data_holder, {})
     
-            
+    @unittest.skip("No test written")
+    def test_assign_control_group(self):
+        pass
+    
+    @unittest.skip("No test written")
+    def test_select_control_group(self):
+        pass
         
         
 
