@@ -6,6 +6,9 @@ class V (object):
     A vector can represent a position or a velocity"""
     def __init__(self, x, y=0, z=0):
         super(V, self).__init__()
+        if type(x) == V:
+            raise Exception("Trying to create a Vector using a Vector as the argument")
+        
         if type(x) == list or type(x) == tuple:
             # It tries to get the 3rd item but can handle a 2D input
             self.v = [x[0], x[1], x[2] if len(x) > 2 else 0]

@@ -15,6 +15,9 @@ class VectorTests(unittest.TestCase):
             if type(args) == list:
                 self.assertEqual(vectors.V(*args).v, expected)
             self.assertEqual(vectors.V(args).v, expected)
+        
+        # We should get an error if we try to build a vector from a vector
+        self.assertRaises(Exception, vectors.V, vectors.V(1,2,3))
     
     def test_equals(self):
         vals = (

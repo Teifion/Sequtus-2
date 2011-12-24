@@ -1,4 +1,6 @@
 import unittest
+import traceback
+import sys
 
 from sequtus.game import application_core
 from sequtus.defaults import core
@@ -12,12 +14,11 @@ class TestCore (core.DefaultCore):
             self.loop()
         
         except Exception as e:
-            traceback.print_exc(file=sys.stdout)
+            # traceback.print_exc(file=sys.stdout)
             
             if self.current_screen != None:
                 self.current_screen.quit()
             
-            pygame.quit()
             raise
         
         return self
@@ -35,12 +36,11 @@ class TestCore (core.DefaultCore):
             self.current_screen._update()
             self.current_screen._redraw()
         except Exception as e:
-            traceback.print_exc(file=sys.stdout)
+            # traceback.print_exc(file=sys.stdout)
             
             if self.current_screen != None:
                 self.current_screen.quit()
             
-            pygame.quit()
             raise
 
 

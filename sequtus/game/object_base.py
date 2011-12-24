@@ -16,8 +16,8 @@ class ObjectBase (object):
     def __init__(self):
         super(ObjectBase, self).__init__()
         
-        self.pos        = [-100, -100, 0]# Assume we're offscreen
-        self.velocity   = [0,0,0]
+        self.pos        = vectors.V([-100, -100, 0])# Assume we're offscreen
+        self.velocity   = vectors.V([0,0,0])
         self.facing     = [0,0]# XY, Z
         
         self.oid = 0
@@ -30,10 +30,10 @@ class ObjectBase (object):
         """Point is a length 2 sequence X, Y"""
         left = self.pos[0] - self.rect.width/2
         right = self.pos[0] + self.rect.width/2
-
+        
         top = self.pos[1] - self.rect.height/2
         bottom = self.pos[1] + self.rect.height/2
-
+        
         if left <= point[0] <= right:
             if top <= point[1] <= bottom:
                 return True
@@ -43,7 +43,7 @@ class ObjectBase (object):
         self.rect = self.image.get_rect()
 
     def update(self):
-        self.pos = vectors.add_vectors(self.pos, self.velocity)
+        self.pos += self.velocity
         
         # Set rect
         self.rect.topleft = (

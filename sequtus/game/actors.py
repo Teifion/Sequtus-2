@@ -490,7 +490,7 @@ class Actor (object_base.ObjectBase):
     def _turn_ai(self, target):
         self.facing = vectors.bound_angle(self.facing)
         
-        target_angle = vectors.V(self.pos).angle(target)
+        target_angle = self.pos.angle(target)
         diff = vectors.angle_diff(self.facing, target_angle)[0]
         
         if abs(diff) <= self.turn_speed:

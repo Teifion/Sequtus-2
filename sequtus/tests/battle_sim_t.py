@@ -6,6 +6,10 @@ from sequtus.tests import application_t
 
 
 class BattleSimTests(unittest.TestCase):
+    def test_several_loop_cycles(self):
+        with application_t.TestCore() as c:
+            c.loop()
+    
     def test_place_actor(self):
         with application_t.TestCore() as c:
             sim = c.current_screen.sim
