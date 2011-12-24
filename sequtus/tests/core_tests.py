@@ -14,18 +14,19 @@ def run(args=None):
         # battle_t.suite,
         screen_lib_t.suite,
         object_base_t.suite,
-        
-        # App core
-        application_t.suite,
-        
-        # Screens
-        battle_screen_t.suite,
-        battle_sim_t.suite,
     ]
     
     # Tests that take a while to run
     slow_tests = [
+        # App core
+        application_t.suite,
+        
+        # Screens
         screen_t.suite,
+        battle_screen_t.suite,
+        
+        # Sim
+        battle_sim_t.suite,
     ]
     
     # Have args been passed?

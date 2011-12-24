@@ -2,6 +2,107 @@ import unittest
 from sequtus.libs import vectors
 
 class VectorTests(unittest.TestCase):
+    def test_init(self):
+        vals = (
+            ([0,1,2],   [0,1,2]),
+            (1,         [1,0,0]),
+            ([0,1],     [0,1,0]),
+            
+            ([-5,-4,-6],[-5,-4,-6]),
+        )
+        
+        for args, expected in vals:
+            if type(args) == list:
+                self.assertEqual(vectors.V(*args).v, expected)
+            self.assertEqual(vectors.V(args).v, expected)
+    
+    def test_equals(self):
+        vals = (
+            ([1,2,3],   [1,2,3],    True),
+            ([-1,-2,-3],[-1,-2,-3], True),
+            
+            ([1,2,3],   [0,2,3],    False),
+            ([1,2,3],   [1,0,3],    False),
+            ([1,2,3],   [1,2,0],    False),
+            
+            ([1,1,1],   [2,2,2],    False),
+        )
+        
+        for v1, v2, expected in vals:
+            if expected:
+                self.assertEqual(vectors.V(v1), vectors.V(v2))
+            else:
+                self.assertNotEqual(vectors.V(v1), vectors.V(v2))
+    
+    def test_operators(self):
+        # Addition
+        add_vals = (
+            ([0,0,0], [1,1,1], [1,1,1]),
+            ([2,2,2], [1,1,1], [3,3,3]),
+            ([0,0,0], [0,0,0], [0,0,0]),
+            ([3,5,7], [0,5,0], [3,10,7]),
+        )
+    
+        for v1, v2, expected in add_vals:
+            self.assertEqual(vectors.V(v1) + vectors.V(v2), expected)
+            self.assertEqual(vectors.V(v1) + v2, expected)
+        
+        # Subtraction
+        subtract_vals = (
+            ([0,0,0], [1,1,1], [-1,-1,-1]),
+            ([2,2,2], [1,1,1], [1,1,1]),
+            ([0,0,0], [0,0,0], [0,0,0]),
+            ([3,5,7], [0,5,0], [3,0,7]),
+        )
+        
+        for v1, v2, expected in subtract_vals:
+            self.assertEqual(vectors.V(v1) - vectors.V(v2), expected)
+            self.assertEqual(vectors.V(v1) - v2, expected)
+        
+        # Multiplication
+        multiply_vals = (
+            ([0,0,0], [1,1,1], [0,0,0]),
+            ([2,2,2], [1,2,1], [2,4,2]),
+            ([0,0,0], [0,0,0], [0,0,0]),
+            ([3,5,7], [2,5,0], [6,25,0]),
+        )
+        
+        for v1, v2, expected in multiply_vals:
+            self.assertEqual(vectors.V(v1) * vectors.V(v2), expected)
+            self.assertEqual(vectors.V(v1) * v2, expected)
+        
+        # Division
+        divide_vals = (
+            ([0,0,0], [1,2,1], [0,0,0]),
+            ([2,2,2], [1,2,1], [2,1,2]),
+            ([0,0,0], [1,1,1], [0,0,0]),
+            ([3,5,7], [2,2,1], [1.5,2.5,7]),
+        )
+        
+        for v1, v2, expected in divide_vals:
+            self.assertEqual(vectors.V(v1) / vectors.V(v2), expected)
+            self.assertEqual(vectors.V(v1) / v2, expected)
+        
+        # Absolute
+        abs_vals = (
+            ([-1,0,0], [1,0,0]),
+            ([2,-2,2], [2,2,2]),
+            ([0,-1,0], [0,1,0]),
+            ([3,5,-7], [3,5,7]),
+        )
+        
+        for v1, expected in abs_vals:
+            self.assertEqual(abs(vectors.V(v1)), expected)
+    
+    def test_magnitude(self):
+        vals = (
+            ([3,4,0], 5),
+            ([4,4,4], 6.928),
+        )
+        
+        for v1, expected in vals:
+            self.assertAlmostEqual(vectors.V(v1).magnitude(), expected, places=2)
+    
     def test_bound_angle(self):
         vals = (
             # 2D
@@ -19,17 +120,6 @@ class VectorTests(unittest.TestCase):
         
         for a, expected in vals:
             self.assertEqual(expected, vectors.bound_angle(a))
-    
-    def test_add_vectors(self):
-        vals = (
-            ([0,0,0], [1,1,1], [1,1,1]),
-            ([2,2,2], [1,1,1], [3,3,3]),
-            ([0,0,0], [0,0,0], [0,0,0]),
-            ([3,5,7], [0,5,0], [3,10,7]),
-        )
-        
-        for a, b, expected in vals:
-            self.assertEqual(vectors.add_vectors(a, b), expected)
     
     def test_move_to_vector(self):
         vals = (
@@ -68,21 +158,15 @@ class VectorTests(unittest.TestCase):
     
     def test_distance(self):
         vals = (
-            # 2D
-            ([0,0], [0,0], 0),
-            ([1,1], [0,0], 1.41),
-            ([3,4], [0,0], 5),
-            ([3,0], [0,0], 3),
-            
             # 3D
-            ([0,0,0], [0,0,0], 0),
-            ([1,1,1], [0,0,0], 1.73),
-            ([3,4,0], [0,0,0], 5),
-            ([3,0,4], [0,0,0], 5),
+            ([0,0,0], 0),
+            ([1,1,1], 1.73),
+            ([3,4,0], 5),
+            ([3,0,4], 5),
         )
         
-        for a, b, expected in vals:
-            self.assertAlmostEqual(vectors.distance(a, b), expected, places=2)
+        for the_point, expected in vals:
+            self.assertAlmostEqual(vectors.distance(the_point), expected, places=2)
     
     def test_angle_diff(self):
         vals = (
@@ -104,6 +188,7 @@ class VectorTests(unittest.TestCase):
             self.assertEqual(vectors.angle_diff(a1, a2), expected)
     
     def test_angle(self):
+        # First we test the function with an argument
         vals = (
             # XY Tests
             ([0,0,0], [4,-4,0], [45, 0]),# Up and right
@@ -133,14 +218,16 @@ class VectorTests(unittest.TestCase):
             # ([0,0,0], [-4,-4,0], [315, 0]),
         )
         
-        for a, b, expected in vals:
-            r, r2 = vectors.angle(a, b)
-            self.assertAlmostEqual(r, expected[0], places=2, msg="vectors.angle(%s, %s) should equal %s, instead got %s" % (
-                a, b, expected[0], r
+        for v1, v2, expected in vals:
+            r1, r2 = vectors.V(v1).angle(v2)
+            
+            self.assertAlmostEqual(r1, expected[0], places=2, msg="vectors.angle(%s, %s) should equal %s, instead got %s" % (
+                v1, v2, expected[0], r1
             ))
             self.assertAlmostEqual(r2, expected[1], places=2)
     
-    def test_angle_single(self):
+        
+        # Now we test the function with no argument
         vals = (
             # XY Tests
             ([4,-4,0], [45, 0]),# Up and right
@@ -161,7 +248,7 @@ class VectorTests(unittest.TestCase):
         )
         
         for a, expected in vals:
-            r, r2 = vectors.angle(a)
+            r, r2 = vectors.V(a).angle()
             self.assertAlmostEqual(r, expected[0], places=2, msg="vectors.angle(%s) should equal %s, instead got %s" % (
                 a, expected[0], r
             ))
@@ -188,6 +275,7 @@ class VectorTests(unittest.TestCase):
             except Exception as e:
                 print("\n\nTrying to midpoint({}, {}, {})\n\n".format(pos1, pos2, distance))
                 raise
+    
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(VectorTests)

@@ -1,83 +1,131 @@
 from __future__ import division
 import math
 
-class Vector (object):
-    """An object designed to allow vector math to be performed"""
+class V (object):
+    """An object designed to allow vector math to be performed
+    A vector can represent a position or a velocity"""
     def __init__(self, x, y=0, z=0):
-        super(Vector, self).__init__()
+        super(V, self).__init__()
         if type(x) == list or type(x) == tuple:
             # It tries to get the 3rd item but can handle a 2D input
             self.v = [x[0], x[1], x[2] if len(x) > 2 else 0]
         else:
             self.v = [x,y,z]
     
-    # http://docs.python.org/reference/datamodel.html#emulating-numeric-types
-    def __add__(self, other): pass
-    def __sub__(self, other): pass
-    def __mul__(self, other): pass
-    def __floordiv__(self, other): pass
-    def __mod__(self, other): pass
-    def __divmod__(self, other): pass
+    # Emulation of a sequence
+    def __getitem__(self, key):
+        if type(key) == int:
+            return self.v[key]
+        else:
+            raise IndexError("No key of %s" % key)
     
-    def __div__(self, other): pass
-    def __truediv__(self, other): pass
+    # Using this we are able to ask if a Vector equals a list or tuple
+    def __eq__(self, other):
+        if type(other) == list or type(other) == tuple:
+            other = V(other)
+        return self.v == other.v
     
-    def __neg__(self): pass
-    def __pos__(self): pass
-    def __abs__(self): pass
-    def __invert__(self): pass
+    # At heart this is designed to be a mathematical object
+    def __add__(self, other):
+        if type(other) != V: other = V(other)
+        return V([self.v[i] + other.v[i] for i in range(3)])
     
-    def __int__(self): pass
-    def __long__(self): pass
-    def __float__(self): pass
-
-# Shorthand
-V = Vector
-
-# Combines two lists
-def add_vectors(vec1, vec2):
-    if type(vec2) == float or type(vec2) == int:
-        vec2 = [vec2, vec2, vec2]
-    
-    try:
-        return [vec1[i] + vec2[i] for i in range(len(vec1))]
-    except Exception as e:
-        print("Vec1: %s" % str(vec1))
-        print("Vec2: %s" % str(vec2))
-        raise
-
-def multiply_vectors(vec1, vec2):
-    if type(vec2) == float or type(vec2) == int:
-        vec2 = [vec2, vec2, vec2]
-    
-    return [vec1[i] * vec2[i] for i in range(len(vec1))]
-
-def divide_vectors(vec1, vec2):
-    if type(vec2) == float or type(vec2) == int:
-        vec2 = [vec2, vec2, vec2]
-    
-    return [vec1[i] / vec2[i] for i in range(len(vec1))]
-
-def sub_vectors(vec1, vec2):
-    if type(vec2) == float or type(vec2) == int:
-        vec2 = [vec2, vec2, vec2]
-    
-    return [vec1[i] - vec2[i] for i in range(len(vec1))]
-
-def abs_vector(v):
-    return [abs(x) for x in v]
-
-def total_velocity(velocity):
-    if len(velocity) == 3:
-        x, y, z = velocity
+    def __sub__(self, other):
+        if type(other) != V: other = V(other)
+        return V([self.v[i] - other.v[i] for i in range(3)])
         
+    def __mul__(self, other):
+        if type(other) != V: other = V(other)
+        return V([self.v[i] * other.v[i] for i in range(3)])
+    
+    def __div__(self, other):
+        if type(other) != V: other = V(other)
+        return V([self.v[i] / other.v[i] for i in range(3)])
+    
+    # More math functions
+    def __abs__(self):
+        return V([abs(self.v[i]) for i in range(3)])
+    
+    def angle(self, v2=None):
+        # If no second vector is passed we just want the angle of our
+        # velocity, not the angle from 
+        if v2 == None:
+            v2 = self.v[:]
+            v1 = [0,0,0]
+        else:
+            v1 = self.v[:]
+        
+        # SOH CAH TOA
+        # We have the opposite and adjacent
+        x = abs(v1[0] - v2[0])
+        y = abs(v1[1] - v2[1])
+        z = abs(v1[2] - v2[2])
+
+        # Exacts, because in these cases we get a divide by 0 error
+        if x == 0:
+            if v1[1] >= v2[1]:# Up
+                xy = 0
+            elif v1[1] < v2[1]:# Down
+                xy = 180
+        elif y == 0:
+            if v1[0] <= v2[0]:# Right
+                xy = 90
+            elif v1[0] > v2[0]:# Left
+                xy = 270
+        else:
+            # Using trig
+            if v1[1] > v2[1]:# Up
+                if v1[0] < v2[0]:# Right
+                    xy = math.degrees(math.atan(x/y))
+                else:# Left
+                    xy = math.degrees(math.atan(y/x)) + 270
+            else:# Down
+                if v1[0] < v2[0]:# Right
+                    xy = math.degrees(math.atan(y/x)) + 90
+                else:# Left
+                    xy = math.degrees(math.atan(x/y)) + 180
+        
+        # UP DOWN
+        hyp = math.sqrt(x*x + y*y)
+        if hyp > 0:
+            za = math.atan(z/hyp)
+        else:
+            za = 0
+        
+        return [xy, math.degrees(za)]
+    
+    def magnitude(self):
+        x,y,z = self.v
+        
+        a = math.sqrt(x**2 + y**2)
+        return math.sqrt(a*a + z*z)    
+    
+    def as_move(self):
+        return [self.angle(), self.magnitude()]
+    
+    def distance(self, the_point=None):
+        """If pos2 is left out then it gives distance to pos1 from origin"""
+        if the_point == None:
+            the_point = [0 for i in range(3)]
+        
+        if type(the_point) != V:
+            the_point = V(the_point)
+        
+        x = abs(self.v[0] - the_point.v[0])
+        y = abs(self.v[1] - the_point.v[1])
+        z = abs(self.v[2] - the_point.v[2])
         a = math.sqrt(x*x + y*y)
+        
         return math.sqrt(a*a + z*z)
-    else:
-        x, y = velocity
-        return math.sqrt(x*x + y*y)
+
+def distance(the_point):
+    """Returns the distance from the origin to the point. It's really just
+    a wrapper around V.distance."""
+    return V(the_point).distance()
 
 def bound_angle(angle):
+    """Returns an angle between the values of 0 and 360, preventing you
+    ending up with angles like -100 or 420"""
     if type(angle) == list or type(angle) == tuple:
         return [bound_angle(angle[0]), bound_angle(angle[1])]
     
@@ -113,10 +161,7 @@ def angle_diff(angle1, angle2=0):
 
 def move_to_vector(angle, distance):
     """
-    distance is the 3D line going from origin at angles a1 and a2 (contained as the variable angle)
-    we must first break it down into the vertical plane to determine the length of the 2D hypotenuse (h)
-    
-    h is the adjacent to our 3D angle which leaves z as the opposite
+    Takes an angle (length 2 sequence) and a distance, returns a Vector
     """
     angle = bound_angle(angle)
     
@@ -129,7 +174,7 @@ def move_to_vector(angle, distance):
     # Now horrizontal
     x, y = _move_to_vector_2d(angle[0], h)
     
-    return [x, y, z]
+    return V(x, y, z)
 
 def _move_to_vector_2d(angle, distance):
     """Returns an opposite and adjacent from the triangle"""
@@ -144,84 +189,11 @@ def _move_to_vector_2d(angle, distance):
     
     return [opp, -adj]
 
-def vector_to_move(vector):
-    return [angle([0,0,0], vector), total_velocity(vector)]
-
-# Gets the angle to go from 1 to 2, first item is 2D angle, 2nd return is the Z angle
-def angle(pos1, pos2=None):
-    if pos2 == None:
-        pos2 = list(pos1)
-        pos1 = [0,0,0]
-    
-    # SOH CAH TOA
-    # We have the opposite and adjacent
-    x = abs(pos1[0] - pos2[0])
-    y = abs(pos1[1] - pos2[1])
-    z = abs(pos1[2] - pos2[2])
-    
-    # Exacts, because in these cases we get a divide by 0 error
-    if x == 0:
-        if pos1[1] >= pos2[1]:# Up
-            xy = 0
-        elif pos1[1] < pos2[1]:# Down
-            xy = 180
-    elif y == 0:
-        if pos1[0] <= pos2[0]:# Right
-            xy = 90
-        elif pos1[0] > pos2[0]:# Left
-            xy = 270
-    else:
-        # Using trig
-        if pos1[1] > pos2[1]:# Up
-            if pos1[0] < pos2[0]:# Right
-                xy = math.degrees(math.atan(x/y))
-            else:# Left
-                xy = math.degrees(math.atan(y/x)) + 270
-        else:# Down
-            if pos1[0] < pos2[0]:# Right
-                xy = math.degrees(math.atan(y/x)) + 90
-            else:# Left
-                xy = math.degrees(math.atan(x/y)) + 180
-    
-    # UP DOWN
-    hyp = math.sqrt(x*x + y*y)
-    if hyp > 0:
-        za = math.atan(z/hyp)
-    else:
-        za = 0
-    
-    return [xy, math.degrees(za)]
-
-def distance(pos1, pos2=None):
-    """If pos2 is left out then it gives distance to pos1 from origin"""
-    if pos2 == None:
-        pos2 = [0 for i in pos1]
-    
-    x = abs(pos1[0] - pos2[0])
-    y = abs(pos1[1] - pos2[1])
-    
-    a = math.sqrt(x*x + y*y)
-    
-    if len(pos1) == 3:
-        z = abs(pos1[2] - pos2[2])
-        return math.sqrt(a*a + z*z)
-    
-    return a
-
-def compare_vectors(vel1, vel2):
-    """
-    Returns a the difference between the two angles, if the two vectors collide then was it head on or side to side?
-    """
-    a1 = vector_to_move(vel1)[0][0]
-    a2 = vector_to_move(vel2)[0][0]
-    
-    return abs(a1-a2)
-
 def get_midpoint(pos1, pos2, distance):
     """
     Given pos1 and pos2 it determines where pos1 will end up if it travels "distance" towards pos2.
     """
-    a, za = angle(pos1, pos2)
+    a, za = V(pos1).angle(pos2)
     
     x = pos1[0] + (math.sin(math.radians(a)) * distance)
     y = pos1[1] - (math.cos(math.radians(a)) * distance)
