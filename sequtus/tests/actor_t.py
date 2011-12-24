@@ -2,7 +2,6 @@ import unittest
 from sequtus.game import actors
 
 class ActorTester(unittest.TestCase):
-    @unittest.skip("Not updated to use vector.class")
     def test_turn_ai(self):
         vals = (
             ([0,0], [10, 10, 0], 90, [90,0]),
