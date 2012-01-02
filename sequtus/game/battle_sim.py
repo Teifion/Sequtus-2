@@ -12,7 +12,7 @@ import pdb
 import weakref
 
 from sequtus.libs import actor_lib, vectors, geometry, pathing, sim_lib, ai_lib
-from sequtus.game import actor_subtypes, teams
+from sequtus.game import actor_subtypes, teams, client
 from sequtus.ai import autotargeter, core_ai
 
 def handle_number(v):
@@ -52,10 +52,11 @@ for a, b, t in attribute_list:
 
 
 class BattleSim (object):
-    def __init__(self, engine, player_team, scenario, game_data, config=None):
+    def __init__(self, engine, player_team, scenario, game_data, config=None, address=None, port=None):
         super(BattleSim, self).__init__()
         
         self.engine = engine
+        self.connection = None
         
         self.actors = {}
         self.bullets = []
@@ -123,6 +124,13 @@ class BattleSim (object):
         except Exception as e:
             self.quit()
             raise
+        
+        # We can try connecting
+        if address != None and port != None:
+            self.connect(address, port)
+    
+    def connect(self, address, port):
+        self.connection = client.Client(self, address, port)
     
     # These are the "public" handles to queue orders to be sent to the server
     def add_order(self, the_actor, command, pos=None, target=None):
@@ -260,6 +268,10 @@ class BattleSim (object):
         if self.next_ai_update <= 0:
             self.update_ai_queues()
             self.next_ai_update = 30
+        
+        # Update our network connection
+        if self.connection == None: return
+        self.connection.update()
         
         self.read_ai_queues()
         

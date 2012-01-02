@@ -1,12 +1,42 @@
 import sys
+import multiprocessing
 import argparse
-
 import sequtus
 
-def default():
-    from sequtus.defaults import core
+from sequtus.game import server
+from sequtus.defaults import core
+
+def new_client(address, port):
+    print("Client started")
     g = core.DefaultCore()
-    g.start("battle")
+    g.start("battle", address=address, port=port)
+
+def two_players():
+    address, port, conn, server_proc = server.run_server()
+    
+    c1 = multiprocessing.Process(
+        target=new_client,
+        args=(address, port)
+    )
+    
+    c2 = multiprocessing.Process(
+        target=new_client,
+        args=(address, port)
+    )
+    
+    c1.start()
+    c2.start()
+    
+    print("Waiting")
+    
+    c1.join()
+    c2.join()
+    
+    conn.send(["quit", {}])
+    server_proc.join()
+
+def default():
+    two_players()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Sequtus command line interface.', prog="sequtus")

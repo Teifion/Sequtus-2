@@ -68,7 +68,7 @@ class Screen (object):
         
         self.transition = screen_lib.transitions[mode](self, **trans_kwargs)
     
-    def activate(self):
+    def activate(self, **kwargs):
         """Called when activated after a screen change"""
         if self.fullscreen:
             self.switch_to_fullscreen()

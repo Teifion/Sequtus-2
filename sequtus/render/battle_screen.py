@@ -79,10 +79,14 @@ class BattleScreen (screen.Screen):
         self._selection_has_changed = False
         self.selected_actors = []
     
-    def activate(self):
-        super(BattleScreen, self).activate()
+    def activate(self, **kwargs):
+        super(BattleScreen, self).activate(**kwargs)
         self.draw_area[2] = self.size[0] - self.draw_area[0]
         self.draw_area[3] = self.size[1] - self.draw_area[1]
+        
+        if self.sim != None:
+            if "port" in kwargs and "address" in kwargs:
+                self.sim.connect(address=kwargs['address'], port=kwargs['port'])
     
     def quit(self):
         self.sim.quit()

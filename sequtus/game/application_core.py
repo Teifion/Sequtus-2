@@ -46,13 +46,7 @@ class EngineV4 (object):
         will only be used if it's a screen constructor."""
         
         if s in self.screens:
-            # Constructor
-            if hasattr(s, '__call__'):
-                s = self.screens[s](self, *args, **kwargs)
-            
-            # Instance
-            else:
-                s = self.screens[s]
+            s = self.screens[s]
         
         # It's a string but not in our dictionary
         elif type(s) == str:
@@ -60,17 +54,17 @@ class EngineV4 (object):
         
         # And launch
         self.current_screen = s
-        self.current_screen.activate()
+        self.current_screen.activate(*args, **kwargs)
         self.current_screen.redraw()
     
     # Contains main execution loop
-    def start(self, screen):
+    def start(self, screen, **kwargs):
         """
         This starts everything going. The screen argument is passed straight to set_screen.
         """
         try:
             self.startup()
-            self.set_screen(screen)
+            self.set_screen(screen, **kwargs)
             
             while True:
                 for event in pygame.event.get():# Event handlers

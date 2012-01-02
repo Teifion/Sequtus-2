@@ -8,7 +8,7 @@ def temp_engine():
     return e
 
 class DefaultCore (application_core.EngineV4):
-    def __init__(self, test_sim=True, player_team=1):
+    def __init__(self, address=None, port=None, test_sim=True, player_team=1):
         super(DefaultCore, self).__init__()
         
         self.load_static_images(
@@ -26,6 +26,8 @@ class DefaultCore (application_core.EngineV4):
                 engine = self,
                 scenario = "sequtus/defaults/scenario.json",
                 game_data = "sequtus/defaults/game_data.json",
+                address = address,
+                port = port,
             )
         else:
             s = sim.DefaultSim(
@@ -33,6 +35,8 @@ class DefaultCore (application_core.EngineV4):
                 engine = self,
                 scenario = "sequtus/defaults/scenario.json",
                 game_data = "sequtus/defaults/game_data.json",
+                address = address,
+                port = port,
             )
         
         self.screens['battle'] = battle.DefaultBattle(self, [640, 480], sim=s)
