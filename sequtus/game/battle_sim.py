@@ -165,6 +165,9 @@ class BattleSim (object):
     def quit(self, event=None):
         for k, q in self.out_queues.items():
             q.put({"cmd":"quit"})
+        
+        if self.connection != None:
+            self.connection.Send({'action': 'quit'})
     
     def _update(self):
         """Wrapper around update to not update too fast"""

@@ -17,6 +17,9 @@ class ClientChannel(Channel):
         self.points = 0
         self.player_id = 0
     
+    def Network(self, data):
+        print("Server: %s" % str(data))
+    
     def Network_quit(self, data=None):
         self._server.running = False
     
@@ -24,6 +27,9 @@ class ClientChannel(Channel):
         x, y = int(data['x']), int(data['y'])
         
         self._server.make_move(self.player_id, x, y)
+    
+    def Network_player_number(self, data):
+        print("Recieved player number")
 
 class SequtusServer(Server):
     channelClass = ClientChannel
@@ -57,7 +63,7 @@ class SequtusServer(Server):
         self.players.append(player)
         
         # send to the player their number
-        player.Send({'action': 'number', 'num': len(self.players)-1})
+        player.Send({'action': 'player_number', 'number': len(self.players)-1})
     
     # this send to all clients the same data
     def send_to_all(self, data):
