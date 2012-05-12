@@ -162,10 +162,15 @@ class BattleSim (object):
     # These functions actually add the order when the network says so
     def _real_issue_order(self, tick, actor_id, command, pos, target):
         the_actor = self.actors[actor_id]
+        if tick not in self.orders:
+            self.orders[tick] = []
         self.orders[tick].append((the_actor, command, pos, target))
         
     def _real_queue_order(self):
-        raise Exception("Not implemented")
+        the_actor = self.actors[actor_id]
+        if tick not in self.q_orders:
+            self.q_orders[tick] = []
+        self.q_orders[tick].append((the_actor, command, pos, target))
     
     def quit(self, event=None):
         for k, q in self.out_queues.items():
@@ -305,8 +310,11 @@ class BattleSim (object):
         
         self.tick += 1
         
-        self.orders[self.tick + self.tick_jump] = []
-        self.q_orders[self.tick + self.tick_jump] = []
+        if self.tick + self.tick_jump not in self.orders:
+            self.orders[self.tick + self.tick_jump] = []
+        
+        if self.tick + self.tick_jump not in self.q_orders:
+            self.q_orders[self.tick + self.tick_jump] = []
         
         # Send and recieve orders with the server
         self.send_recieve_orders()
