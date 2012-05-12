@@ -5,7 +5,7 @@ from sequtus.PodSixNet.Connection import connection, ConnectionListener
 skip_set = ('issue_order', 'socketConnect', 'player_number')
 
 class Client (ConnectionListener):
-    def __init__(self, sim, address, port, debug=True):
+    def __init__(self, sim, address, port, debug=False):
         super(Client, self).__init__()
         self.sim = sim
         self.debug = debug
@@ -37,7 +37,8 @@ class Client (ConnectionListener):
         raise Exception("%s, source: %s" % (data['error'], data['source']))
     
     def Network_issue_order(self, data):
-        print(data)
+        if self.debug:
+            print(data)
         self.sim._real_issue_order(tick=data['tick'], actor_id=data['actor'], command=data['cmd'], pos=data['pos'], target=data['pos'])
     
     def Network_queue_order(self, data):

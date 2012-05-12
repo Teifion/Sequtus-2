@@ -5,15 +5,14 @@ BattleSim is the subclass that runs the battle itself.
 The sim is expected to be subclassed so as to program in the game rules.
 """
 
-import random
 import time
 import sys
-import traceback
 import json
-import pdb
 import weakref
 
-from sequtus.libs import actor_lib, vectors, geometry, pathing, sim_lib, ai_lib
+import pygame
+
+from sequtus.libs import actor_lib, vectors, sim_lib, ai_lib
 from sequtus.game import actor_subtypes, teams, client
 from sequtus.ai import autotargeter, core_ai
 
@@ -123,7 +122,7 @@ class BattleSim (object):
         # Now load it all up, if we error here we want to kill our threads
         try:
             self.load_all(player_team, scenario, game_data, config)
-        except Exception as e:
+        except Exception:
             self.quit()
             raise
         
@@ -166,7 +165,7 @@ class BattleSim (object):
             self.orders[tick] = []
         self.orders[tick].append((the_actor, command, pos, target))
         
-    def _real_queue_order(self):
+    def _real_queue_order(self, tick, actor_id, command, pos, target):
         the_actor = self.actors[actor_id]
         if tick not in self.q_orders:
             self.q_orders[tick] = []
