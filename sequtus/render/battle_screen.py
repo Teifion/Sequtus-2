@@ -375,10 +375,9 @@ class BattleScreen (screen.Screen):
 
             # Right click
             elif event.button == 3:
-                self._right_click(event)
                 if len(self.selected_actors) == 0:
                     return
-
+                
                 self._right_click(event)
 
             else:

@@ -5,8 +5,10 @@ BattleSim is the subclass that runs the battle itself.
 The sim is expected to be subclassed so as to program in the game rules.
 """
 
+import random
 import time
 import sys
+import traceback
 import json
 import pdb
 import weakref
@@ -37,10 +39,10 @@ attribute_handlers = {
 }
 
 attribute_list = (
-    ("collision_interval",  "_collision_interval", "number"),
-    ("scroll_speed",        "scroll_speed", "number"),
-    ("allow_mouse_scroll",  "allow_mouse_scroll", "boolean"),
-    ("scroll_delay",        "scroll_delay", "number"),
+    ("collision_interval",  "_collision_interval",  "number"),
+    ("scroll_speed",        "scroll_speed",         "number"),
+    ("allow_mouse_scroll",  "allow_mouse_scroll",   "boolean"),
+    ("scroll_delay",        "scroll_delay",         "number"),
 )
 
 
@@ -134,6 +136,10 @@ class BattleSim (object):
     
     # These are the "public" handles to queue orders to be sent to the server
     def add_order(self, the_actor, command, pos=None, target=None):
+        # print repr(traceback.extract_stack())
+        # print "\n".join(traceback.format_stack())
+        # print()
+        
         """Sets the order for a given actor"""
         if type(the_actor) != int:
             the_actor = the_actor.oid
@@ -154,11 +160,10 @@ class BattleSim (object):
         self.orders_to_queue.append((the_actor, command, pos, target))
     
     # These functions actually add the order when the network says so
-    def _real_add_order(self, tick, actor_id, command, pos, target):
-        raise Exception("Not implemented")
+    def _real_issue_order(self, tick, actor_id, command, pos, target):
         the_actor = self.actors[actor_id]
-        self.orders_to_send[tick].append((the_actor, command, pos, target))
-    
+        self.orders[tick].append((the_actor, command, pos, target))
+        
     def _real_queue_order(self):
         raise Exception("Not implemented")
     
@@ -216,6 +221,26 @@ class BattleSim (object):
         
         del(self.orders[self.tick])
         del(self.q_orders[self.tick])
+        
+    def send_recieve_orders(self):
+        # TODO
+        """
+        Make it so the sim sends info to server and server sends it to all clients so they
+        all run the sim at the same speed. Make sure to add tests for it.
+        """
+        
+        for the_actor, cmd, pos, target in self.orders_to_send:
+            self.connection.Send({'action': 'issue_order', "cmd":cmd, "pos":pos, "target":target, "actor":the_actor, "tick":self.tick + self.tick_jump})
+        
+        for the_actor, cmd, pos, target in self.orders_to_queue:
+            self.connection.Send({'action': 'issue_order', "cmd":cmd, "pos":pos, "target":target, "actor":the_actor, "tick":self.tick + self.tick_jump})
+        
+        # if self.orders_to_send != [] or self.orders_to_queue != []:
+        #     print(self.orders_to_send)
+        #     print(self.orders_to_queue)
+        
+        self.orders_to_send = []
+        self.orders_to_queue = []
     
     def read_ai_queues(self):
         for t, q in self.in_queues.items():
@@ -283,6 +308,10 @@ class BattleSim (object):
         self.orders[self.tick + self.tick_jump] = []
         self.q_orders[self.tick + self.tick_jump] = []
         
+        # Send and recieve orders with the server
+        self.send_recieve_orders()
+        
+        # Run orders sent by the server
         self.issue_orders()
         
         # Update the AIs

@@ -7,9 +7,9 @@ class V (object):
     def __init__(self, x, y=0, z=0):
         super(V, self).__init__()
         if type(x) == V:
-            raise Exception("Trying to create a Vector using a Vector as the argument")
+            self.v =  list(x.v)
         
-        if type(x) == list or type(x) == tuple:
+        elif type(x) == list or type(x) == tuple:
             # It tries to get the 3rd item but can handle a 2D input
             self.v = [x[0], x[1], x[2] if len(x) > 2 else 0]
         else:
@@ -121,10 +121,13 @@ class V (object):
         
         return math.sqrt(a*a + z*z)
 
-def distance(the_point):
+def distance(point1, point2=None):
     """Returns the distance from the origin to the point. It's really just
     a wrapper around V.distance."""
-    return V(the_point).distance()
+    if point2 == None:
+        return V(point1).distance()
+    
+    return V(point1).distance(point2)
 
 def bound_angle(angle):
     """Returns an angle between the values of 0 and 360, preventing you

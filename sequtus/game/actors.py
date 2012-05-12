@@ -167,8 +167,8 @@ class Actor (object_base.ObjectBase):
         self.actor_type = data["type"]
         
         self.hp = data.get("hp", self.max_hp)
-        self.pos = data.get("pos", self.pos)
-        self.velocity = data.get("velocity", self.velocity)
+        self.pos = vectors.V(data.get("pos", self.pos))
+        self.velocity = vectors.V(data.get("velocity", self.velocity))
         self.facing = data.get("facing", self.facing)
         self.team = data.get("team", self.team)
         
@@ -395,7 +395,7 @@ class Actor (object_base.ObjectBase):
         self._help_ai()
         
         if cmd == "stop" or cmd == "hold position":
-            self.velocity = [0,0,0]
+            self.velocity = vectors.V(0,0,0)
             
             if target == 0:
                 self.next_order()
@@ -403,9 +403,9 @@ class Actor (object_base.ObjectBase):
         elif cmd == "move":
             self._move_ai(pos)
             
-            if vectors.distance(self.pos, pos) <= vectors.total_velocity(self.velocity):
-                self.pos = pos
-                self.velocity = [0,0,0]
+            if vectors.distance(self.pos, pos) <= self.velocity.magnitude():
+                self.pos = vectors.V(pos)
+                self.velocity = vectors.V(0,0,0)
                 self.next_order()
         
         elif cmd == "attack":
@@ -483,7 +483,7 @@ class Actor (object_base.ObjectBase):
                 
             else:
                 # Wrong way, if we are moving we need to stop before turning
-                if vectors.total_velocity(self.velocity) > 0:
+                if self.velocity.magnitude() > 0:
                     self.facing = origional_facing
                     self._decelerate_ai()
     
@@ -510,20 +510,20 @@ class Actor (object_base.ObjectBase):
         dist = vectors.distance(self.pos, target)
         
         if dist > self.max_velocity:
-            self.velocity = vectors.move_to_vector(vectors.angle(self.pos, target), self.max_velocity)
+            self.velocity = vectors.move_to_vector(self.pos.angle(target), self.max_velocity)
         else:
-            self.velocity = vectors.move_to_vector(vectors.angle(self.pos, target), dist)
+            self.velocity = vectors.move_to_vector(self.pos.angle(target), dist)
     
     def _decelerate_ai(self):
-        total_velocity = vectors.total_velocity(self.velocity)
+        total_velocity = self.velocity.magnitude()
         
         if total_velocity <= self.deceleration:
-            self.velocity = [0,0,0]
+            self.velocity = vectors.V(0,0,0)
         else:
             new_vel = total_velocity - self.deceleration
             div = total_velocity / new_vel
             
-            self.velocity = [v / div for v in self.velocity]
+            self.velocity = vectors.V([v / div for v in self.velocity])
         
     
     def _help_ai(self):

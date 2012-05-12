@@ -7,6 +7,8 @@ import multiprocessing
 from sequtus.PodSixNet.Channel import Channel
 from sequtus.PodSixNet.Server import Server
 
+skip_set = ('issue_order')
+
 # class representing a sigle connection with a client
 # this can also represent a player
 class ClientChannel(Channel):
@@ -17,8 +19,18 @@ class ClientChannel(Channel):
         self.points = 0
         self.player_id = 0
     
+    # Used to pick up missed network commands
     def Network(self, data):
-        print("Server: %s" % str(data))
+        if data['action'] not in skip_set:
+            action = data['action']
+            del(data['action'])
+            print("Server unhandled %s: %s" % (action, str(data)))
+    
+    def Network_issue_order(self, data):
+        self._server.issue_order(the_actor=data['actor'], cmd=data['cmd'], pos=data['pos'], target=data['target'], tick=data['tick'])
+    
+    def Network_queue_order(self, data):
+        self._server.queue_order(the_actor=data['actor'], cmd=data['cmd'], pos=data['pos'], target=data['target'], tick=data['tick'])
     
     def Network_quit(self, data=None):
         self._server.running = False
@@ -53,6 +65,9 @@ class SequtusServer(Server):
         
         self.address, self.port = kwargs['localaddr']
         print('Server started at {} at port {}'.format(self.address, str(self.port)))
+        
+        self.orders_to_issue = []
+        self.orders_to_queue = []
     
     # function called on every connection
     def Connected(self, player, addr):
@@ -99,9 +114,25 @@ class SequtusServer(Server):
                 print("No handler for {}:{}".format(cmd, str(kwargs)))
         
         # What is happening today?
-        """SERVER LOGIC GOES HERE"""
+        # Distribute orders back to connected sims
+        for the_actor, cmd, pos, target, tick in self.orders_to_issue:
+            self.send_to_all({"action":"issue_order",
+                "actor":the_actor, "cmd":cmd, "pos":pos, "target":target, "tick":tick})
+        
+        for the_actor, cmd, pos, target, tick in self.orders_to_queue:
+            self.send_to_all({"action":"queue_order",
+                "actor":the_actor, "cmd":cmd, "pos":pos, "target":target, "tick":tick})
+        
+        self.orders_to_issue = []
+        self.orders_to_queue = []
         
         self._next_update = time.time() + self._update_delay
+    
+    def issue_order(self, the_actor, cmd, pos, target, tick):
+        self.orders_to_issue.append((the_actor, cmd, pos, target, tick))
+    
+    def queue_order(self, the_actor, cmd, pos, target, tick):
+        self.orders_to_queue.append((the_actor, cmd, pos, target, tick))
 
 
 def new_server(connection):

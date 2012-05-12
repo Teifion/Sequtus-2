@@ -16,8 +16,8 @@ class ObjectBase (object):
     def __init__(self):
         super(ObjectBase, self).__init__()
         
-        self.pos        = vectors.V([-100, -100, 0])# Assume we're offscreen
-        self.velocity   = vectors.V([0,0,0])
+        self.pos        = vectors.V(-100, -100, 0)# Assume we're offscreen
+        self.velocity   = vectors.V(0,0,0)
         self.facing     = [0,0]# XY, Z
         
         self.oid = 0
